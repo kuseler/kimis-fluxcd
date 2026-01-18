@@ -43,7 +43,7 @@ spec:
         enabled: true
         className: nginx
         hosts:
-          - host: sonarr.local
+          - host: jellyfin.local
             paths:
               - path: /
                 service:
