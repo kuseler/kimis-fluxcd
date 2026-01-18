@@ -20,13 +20,6 @@ spec:
           main:
             securityContext:
               privileged: true # HW acceleration
-            persistence:
-              dri:
-                enabled: true
-                type: hostPath
-                hostPath: /dev/dri
-                globalMounts:
-                  - path: /dev/dri
             image:
               repository: ghcr.io/jellyfin/jellyfin
               tag: latest
@@ -35,6 +28,7 @@ spec:
               TZ: Europe/Berlin 
     service:
       main:
+        controller: main
         ports:
           http:
             port: 8096 
@@ -62,3 +56,9 @@ spec:
         existingClaim: media-nfs-pvc
         globalMounts:
           - path: /media
+      dri:
+        enabled: true
+        type: hostPath
+        hostPath: /dev/dri
+        globalMounts:
+          - path: /dev/dri
