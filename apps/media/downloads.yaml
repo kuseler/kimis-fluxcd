@@ -1,0 +1,74 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: "3.2.1"
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      main:
+        pod:
+          securityContext:
+            fsGroup: 568 # Commonly required for accessing NFS/media
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/qbittorrent
+              tag: 4.6.3
+            env:
+              QBITTORRENT__PORT: 8080
+          # THE VPN SIDECAR
+          # ... inside controllers.main.containers ...
+          gluetun:
+            image:
+              repository: qmcgaw/gluetun
+              tag: latest
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+            env:
+              VPN_SERVICE_PROVIDER: protonvpn
+              VPN_TYPE: wireguard
+              # Standard variables can stay here
+              WIREGUARD_ADDRESSES: "10.2.0.2/32" 
+              SERVER_COUNTRIES: "Germany"
+              # SECURE REFERENCE BELOW:
+              WIREGUARD_PRIVATE_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: proton-vpn-secret
+                    key: private-key
+    service:
+      main:
+        ports:
+          http:
+            port: 8080
+    ingress:
+      main:
+        enabled: true
+        className: nginx
+        hosts:
+          - host: qb.local
+            paths:
+              - path: /
+                service:
+                  identifier: main
+                  port: http
+    persistence:
+      config:
+        enabled: true
+        type: emptyDir # Or use a PVC if you want to save qBit settings
+      media:
+        enabled: true
+        existingClaim: media-nfs-pvc
+        globalMounts:
+          - path: /media

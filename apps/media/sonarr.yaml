@@ -1,0 +1,55 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sonarr
+  namespace: media
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: "3.2.1"
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  values:
+    controllers:
+      main:
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/sonarr
+              tag: 4.0.0
+            env:
+              # Timezone is important for air dates
+              TZ: Europe/Berlin 
+    service:
+      main:
+        ports:
+          http:
+            port: 8989
+    ingress:
+      main:
+        enabled: true
+        className: nginx
+        hosts:
+          - host: sonarr.local
+            paths:
+              - path: /
+                service:
+                  identifier: main
+                  port: http
+    persistence:
+      config:
+        enabled: true
+        # Use a PVC here if you want to save Sonarr settings
+        # type: persistentVolumeClaim
+        # accessMode: ReadWriteOnce
+        # size: 1Gi
+        type: emptyDir 
+      media:
+        enabled: true
+        existingClaim: media-nfs-pvc
+        globalMounts:
+          - path: /media
