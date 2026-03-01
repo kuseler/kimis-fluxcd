@@ -36,7 +36,7 @@ spec:
         enabled: true
         className: nginx
         hosts:
-          - host: jellyfin.local
+          - host: jellyfin.homelab.fritz.box
             paths:
               - path: /
                 service:
