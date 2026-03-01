@@ -42,22 +42,4 @@ spec:
                 service:
                   identifier: main
                   port: http
-    persistence:
-      config:
-        enabled: true
-        # Use a PVC here if you want to save Sonarr settings
-        # type: persistentVolumeClaim
-        # accessMode: ReadWriteOnce
-        # size: 1Gi
-        type: emptyDir 
-      media:
-        enabled: true
-        existingClaim: media-nfs-pvc
-        globalMounts:
-          - path: /media
-      dri:
-        enabled: true
-        type: hostPath
-        hostPath: /dev/dri
-        globalMounts:
-          - path: /dev/dri
+    
