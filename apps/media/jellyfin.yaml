@@ -13,39 +13,30 @@ spec:
         name: jellyfin-helm
         namespace: flux-system
   values:
-    jellyfin:
-      controllers:
-        main:
-          containers:
-            main:
-              securityContext:
-                privileged: false # HW acceleration
-              image:
-                repository: ghcr.io/jellyfin/jellyfin
-                tag: latest
-              env:
-                # Timezone is important for air dates
-                TZ: Europe/Berlin 
-      service:
-        main:
-          controller: main
-          ports:
-            http:
-              port: 8096 
-      ingress:
-        main:
-          enabled: true
-          className: traefik
-          hosts:
-            - host: jellyfin.homelab.fritz.box
-              paths:
-                - path: /
-                  service:
-                    identifier: main
-                    port: http
-            - host: jellyfin.homelab.local
-              paths:
-                - path: /
-                  service:
-                    identifier: main
-                    port: http
+    # Notice no top-level "jellyfin:" key and no "controllers/containers"
+    image:
+      repository: ghcr.io/jellyfin/jellyfin
+      tag: latest
+      pullPolicy: IfNotPresent
+    
+    env:
+      TZ: Europe/Berlin
+    
+    # Ingress configuration tailored to the official chart
+    ingress:
+      enabled: true
+      className: traefik
+      hosts:
+        - host: jellyfin.homelab.fritz.box
+          paths:
+            - path: /
+              pathType: Prefix
+        - host: jellyfin.homelab.local
+          paths:
+            - path: /
+              pathType: Prefix
+              
+    # Hardware acceleration requires turning off the default securityContext limits
+    # The official chart handles security contexts differently than app-template
+    securityContext:
+      privileged: false
