@@ -13,38 +13,39 @@ spec:
         name: jellyfin-helm
         namespace: flux-system
   values:
-    controllers:
-      main:
-        containers:
-          main:
-            securityContext:
-              privileged: false # HW acceleration
-            image:
-              repository: ghcr.io/jellyfin/jellyfin
-              tag: latest
-            env:
-              # Timezone is important for air dates
-              TZ: Europe/Berlin 
-    service:
-      main:
-        controller: main
-        ports:
-          http:
-            port: 8096 
-    ingress:
-      main:
-        enabled: true
-        className: traefik
-        hosts:
-          - host: jellyfin.homelab.fritz.box
-            paths:
-              - path: /
-                service:
-                  identifier: main
-                  port: http
-          - host: jellyfin.homelab.local
-            paths:
-              - path: /
-                service:
-                  identifier: main
-                  port: http
+    jellyfin:
+      controllers:
+        main:
+          containers:
+            main:
+              securityContext:
+                privileged: false # HW acceleration
+              image:
+                repository: ghcr.io/jellyfin/jellyfin
+                tag: latest
+              env:
+                # Timezone is important for air dates
+                TZ: Europe/Berlin 
+      service:
+        main:
+          controller: main
+          ports:
+            http:
+              port: 8096 
+      ingress:
+        main:
+          enabled: true
+          className: traefik
+          hosts:
+            - host: jellyfin.homelab.fritz.box
+              paths:
+                - path: /
+                  service:
+                    identifier: main
+                    port: http
+            - host: jellyfin.homelab.local
+              paths:
+                - path: /
+                  service:
+                    identifier: main
+                    port: http
