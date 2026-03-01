@@ -42,3 +42,9 @@ spec:
                 service:
                   identifier: main
                   port: http
+          - host: jellyfin.homelab.local
+            paths:
+              - path: /
+                service:
+                  identifier: main
+                  port: http
