@@ -13,16 +13,12 @@ spec:
         name: jellyfin-helm
         namespace: flux-system
   values:
-    # Notice no top-level "jellyfin:" key and no "controllers/containers"
     image:
       repository: ghcr.io/jellyfin/jellyfin
       tag: latest
       pullPolicy: IfNotPresent
-    
     env:
       TZ: Europe/Berlin
-    
-    # Ingress configuration tailored to the official chart
     ingress:
       enabled: true
       className: traefik
