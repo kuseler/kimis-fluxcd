@@ -19,7 +19,7 @@ spec:
         containers:
           main:
             securityContext:
-              privileged: true # HW acceleration
+              privileged: false # HW acceleration
             image:
               repository: ghcr.io/jellyfin/jellyfin
               tag: latest
