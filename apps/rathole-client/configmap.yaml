@@ -1,0 +1,44 @@
+# apps/rathole-client/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rathole-client-config
+  namespace: rathole-client
+data:
+  rathole.toml: |
+    [client]
+    remote_addr = "kimimueller.de:2333" 
+
+    [client.authentication]
+    method = "token"
+    # The token is read from the 'RATHOLE_AUTH_TOKEN' environment variable.
+    token = env("RATHOLE_AUTH_TOKEN")
+
+    # Default transport for TCP services like HTTP/S
+    [client.transport]
+    type = "tcp"
+
+    # Named transport for UDP services like WireGuard
+    [client.transport.udp]
+    type = "udp"
+
+    # Forwards HTTP traffic to Traefik (TCP)
+    [client.services.http]
+    token = env("RATHOLE_AUTH_TOKEN")
+    # IMPORTANT: Verify this is the correct internal service name for Traefik.
+    # Common names are 'traefik.traefik.svc.cluster.local' or 'traefik.kube-system.svc.cluster.local'.
+    local_addr = "traefik.traefik.svc.cluster.local:80"
+
+    # Forwards HTTPS traffic to Traefik (TCP)
+    [client.services.https]
+    token = env("RATHOLE_AUTH_TOKEN")
+    # IMPORTANT: Verify this is the correct internal service name for Traefik.
+    local_addr = "traefik.traefik.svc.cluster.local:443"
+
+    # Forwards WireGuard traffic to your Fritz!Box (UDP)
+    # CAVEAT: The Rathole pod must be able to reach this IP on your local network.
+    [client.services.wireguard]
+    transport = "udp" # Use the named 'udp' transport
+    token = env("RATHOLE_AUTH_TOKEN")
+    # IMPORTANT: Change this to your Fritz!Box's actual IP and WireGuard port.
+    local_addr = "192.168.1.4:51820"

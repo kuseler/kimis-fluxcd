@@ -1,0 +1,42 @@
+# apps/rathole-client/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rathole-client
+  namespace: rathole-client
+  labels:
+    app: rathole-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rathole-client
+  template:
+    metadata:
+      labels:
+        app: rathole-client
+    spec:
+      containers:
+      - name: rathole-client
+        image: rapiz1/rathole:v0.5.0 # Using a specific version for reproducibility
+        imagePullPolicy: IfNotPresent
+        command:
+          - "/app/rathole"
+          - "-c"
+          - "/app/config/rathole.toml"
+        env:
+          # This environment variable provides the authentication token to the rathole client.
+          # It references the 'rathole-auth' secret which you will create manually.
+          - name: RATHOLE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: rathole-auth
+                key: token
+        volumeMounts:
+        - name: config
+          mountPath: "/app/config"
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: rathole-client-config
