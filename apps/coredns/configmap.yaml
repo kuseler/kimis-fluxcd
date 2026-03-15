@@ -6,11 +6,21 @@ metadata:
 data:
   Corefile: |
     .:53 {
-        forward . 8.8.8.8
         errors
         log
 
-        template IN A homelab.fritz.box {
-            answer "{{ .Name }} 60 IN A 192.168.1.80"
+        # 1. Match both the apex domain AND all subdomains
+        rewrite stop name regex .*\.?homelab\.fritz\.box traefik-ingress.local
+
+        # 2. Resolve them to your Traefik IP
+        hosts {
+            192.168.1.80 traefik-ingress.local
+            fallthrough
+        }
+
+        # 3. Forward unknown queries to the Fritz!Box first, THEN Google
+        # This keeps your standard router DNS functions alive!
+        forward . 192.168.1.1 8.8.8.8 {
+            max_concurrent 1000
         }
     }
