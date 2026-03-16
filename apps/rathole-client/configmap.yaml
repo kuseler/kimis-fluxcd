@@ -8,6 +8,7 @@ data:
   rathole.toml: |
     [client]
     remote_addr = "kimimueller.de:2333" 
+    default_token = "${RATHOLE_TOKEN}"
 
     [client.authentication]
     method = "token"
