@@ -37,7 +37,7 @@ data:
 
     # Forwards WireGuard traffic to your Fritz!Box (UDP)
     # CAVEAT: The Rathole pod must be able to reach this IP on your local network.
-    [client.services.wireguard]
+    [client.services.fritzbox-wg]
     transport = "udp" # Use the named 'udp' transport
     token = env("RATHOLE_AUTH_TOKEN")
     # IMPORTANT: Change this to your Fritz!Box's actual IP and WireGuard port.
