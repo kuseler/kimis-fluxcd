@@ -15,8 +15,8 @@ data:
     type = "tcp"
 
     # Named transport for UDP services like WireGuard
-    #    [client.transport.udp]
-    # type = "udp"
+    [client.transport.udp]
+    type = "udp"
 
     # Forwards HTTP traffic to Traefik (TCP)
     [client.services.http]
@@ -32,6 +32,6 @@ data:
     # Forwards WireGuard traffic to your Fritz!Box (UDP)
     # CAVEAT: The Rathole pod must be able to reach this IP on your local network.
     [client.services.fritzbox-wg]
-    transport = "udp" # Use the named 'udp' transport
+    type = "udp" # Use the named 'udp' transport
     # IMPORTANT: Change this to your Fritz!Box's actual IP and WireGuard port.
     local_addr = "192.168.1.1:51444"
