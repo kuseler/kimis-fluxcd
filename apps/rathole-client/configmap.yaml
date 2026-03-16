@@ -13,7 +13,6 @@ data:
     [client.authentication]
     method = "token"
     # The token is read from the 'RATHOLE_AUTH_TOKEN' environment variable.
-    token = env("RATHOLE_AUTH_TOKEN")
 
     # Default transport for TCP services like HTTP/S
     [client.transport]
@@ -25,14 +24,12 @@ data:
 
     # Forwards HTTP traffic to Traefik (TCP)
     [client.services.http]
-    token = env("RATHOLE_AUTH_TOKEN")
     # IMPORTANT: Verify this is the correct internal service name for Traefik.
     # Common names are 'traefik.traefik.svc.cluster.local' or 'traefik.kube-system.svc.cluster.local'.
     local_addr = "traefik.traefik.svc.cluster.local:80"
 
     # Forwards HTTPS traffic to Traefik (TCP)
     [client.services.https]
-    token = env("RATHOLE_AUTH_TOKEN")
     # IMPORTANT: Verify this is the correct internal service name for Traefik.
     local_addr = "traefik.traefik.svc.cluster.local:443"
 
@@ -40,6 +37,5 @@ data:
     # CAVEAT: The Rathole pod must be able to reach this IP on your local network.
     [client.services.fritzbox-wg]
     transport = "udp" # Use the named 'udp' transport
-    token = env("RATHOLE_AUTH_TOKEN")
     # IMPORTANT: Change this to your Fritz!Box's actual IP and WireGuard port.
     local_addr = "192.168.1.1:51444"
