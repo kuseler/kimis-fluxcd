@@ -10,10 +10,6 @@ data:
     remote_addr = "kimimueller.de:2333" 
     default_token = "${RATHOLE_TOKEN}"
 
-    [client.authentication]
-    method = "token"
-    # The token is read from the 'RATHOLE_AUTH_TOKEN' environment variable.
-
     # Default transport for TCP services like HTTP/S
     [client.transport]
     type = "tcp"
