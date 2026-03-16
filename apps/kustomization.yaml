@@ -4,3 +4,4 @@ resources:
   - media
   - rathole-client
   - coredns
+  - working-page

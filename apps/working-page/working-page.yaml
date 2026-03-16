@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: working-page-html
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Status</title>
+        <style>
+          body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+          h1 { color: #333; }
+        </style>
+      </head>
+      <body>
+        <h1>i am working</h1>
+      </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: working-page
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: working-page
+  template:
+    metadata:
+      labels:
+        app: working-page
+    spec:
+      containers:
+      - name: web
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: working-page-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: working-page-svc
+  namespace: default
+spec:
+  selector:
+    app: working-page
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: working-page-ingress
+  namespace: default
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: homelab.fritz.box # <-- No subdomains, just the base URL
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: working-page-svc
+            port:
+              number: 80
