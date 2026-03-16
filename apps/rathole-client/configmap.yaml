@@ -41,4 +41,4 @@ data:
     transport = "udp" # Use the named 'udp' transport
     token = env("RATHOLE_AUTH_TOKEN")
     # IMPORTANT: Change this to your Fritz!Box's actual IP and WireGuard port.
-    local_addr = "fritz.box:51820"
+    local_addr = "192.168.1.1:51444"
