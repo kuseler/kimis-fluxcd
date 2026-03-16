@@ -15,8 +15,8 @@ data:
     type = "tcp"
 
     # Named transport for UDP services like WireGuard
-    [client.transport.udp]
-    type = "udp"
+    #    [client.transport.udp]
+    # type = "udp"
 
     # Forwards HTTP traffic to Traefik (TCP)
     [client.services.http]
