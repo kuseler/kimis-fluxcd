@@ -17,8 +17,10 @@ spec:
       repository: ghcr.io/jellyfin/jellyfin
       tag: latest
       pullPolicy: IfNotPresent
-    env:
-      TZ: Europe/Berlin
+    jellyfin:
+      env:
+        - name: TZ
+          value: Europe/Berlin
     ingress:
       enabled: true
       className: traefik
@@ -38,8 +40,3 @@ spec:
       media:
         enabled: true
         existingClaim: "media-nfs-pvc"
-              
-    # Hardware acceleration requires turning off the default securityContext limits
-    # The official chart handles security contexts differently than app-template
-    securityContext:
-      privileged: false
