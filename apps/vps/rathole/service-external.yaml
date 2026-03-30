@@ -1,0 +1,22 @@
+# /apps/rathole/service-external.yaml
+# Exposes the rathole control channel and fritzbox-wg directly via LoadBalancer.
+# Keeping these separate from the main ClusterIP service avoids port conflicts
+# with Traefik's own LoadBalancer service (ports 80/443) on k3s/klipper-lb.
+apiVersion: v1
+kind: Service
+metadata:
+  name: rathole-external
+  namespace: rathole
+spec:
+  type: LoadBalancer
+  selector:
+    app: rathole-server
+  ports:
+    - name: control
+      port: 2333
+      targetPort: 2333
+      protocol: TCP
+    - name: fritzbox-wg
+      port: 51820
+      targetPort: 51820
+      protocol: UDP

@@ -27,7 +27,7 @@ spec:
         env:
           # This environment variable provides the authentication token to the rathole client.
           # It references the 'rathole-auth' secret which you will create manually.
-          - name: RATHOLE_AUTH_TOKEN
+          - name: RATHOLE_TOKEN
             valueFrom:
               secretKeyRef:
                 name: rathole-auth

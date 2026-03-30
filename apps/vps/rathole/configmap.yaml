@@ -1,0 +1,21 @@
+# /apps/rathole/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rathole-server-config
+  namespace: rathole
+data:
+  rathole.toml: |
+    [server]
+    bind_addr = "0.0.0.0:2333"
+    default_token = "${RATHOLE_TOKEN}"
+
+    [server.services.http]
+    bind_addr = "0.0.0.0:80"
+
+    [server.services.https]
+    bind_addr = "0.0.0.0:443"
+
+    [server.services.fritzbox-wg]
+    bind_addr = "0.0.0.0:51820"
+    type = "udp"

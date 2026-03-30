@@ -1,0 +1,51 @@
+# /apps/rathole/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rathole-server
+  namespace: rathole
+  labels:
+    app: rathole-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rathole-server
+  template:
+    metadata:
+      labels:
+        app: rathole-server
+    spec:
+      containers:
+        - name: rathole
+          image: rapiz1/rathole:v0.5.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - /etc/rathole/rathole.toml
+          ports:
+            - name: control
+              containerPort: 2333
+              protocol: TCP
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: fritzbox-wg
+              containerPort: 51820
+              protocol: UDP
+          env:
+            - name: RATHOLE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: rathole-auth
+                  key: token
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rathole
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: rathole-server-config
