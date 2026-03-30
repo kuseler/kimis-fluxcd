@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
 	- rathole
 	- traefik-ingress
-	- homepage

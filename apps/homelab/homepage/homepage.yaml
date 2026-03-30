@@ -18,7 +18,7 @@ spec:
         image: ghcr.io/gethomepage/homepage:latest
         env:
         - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "gethomepage.dev"
+          value: "homepage.kimimueller.de,homepage.homelab.fritz.box,homepage.homelab.local"
         - name: PUID
           value: "1000"
         - name: PGID
@@ -45,3 +45,42 @@ spec:
   - protocol: TCP
     port: 3000
     targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage-ingress
+  namespace: default
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: homepage.kimimueller.de
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: homepage
+            port:
+              number: 3000
+  - host: homepage.homelab.fritz.box
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: homepage
+            port:
+              number: 3000
+  - host: homepage.homelab.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: homepage
+            port:
+              number: 3000
