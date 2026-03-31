@@ -66,6 +66,12 @@ kind: Ingress
 metadata:
   name: working-page-ingress
   namespace: default
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Status"
+    gethomepage.dev/description: "Cluster status page"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "nginx.png"
 spec:
   ingressClassName: traefik
   rules:
