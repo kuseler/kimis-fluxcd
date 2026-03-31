@@ -1,7 +1,9 @@
 # /clusters/vps/traefik-ingress.yaml
 # Route plain HTTP traffic (entrypoint: web / port 80) to rathole's HTTP service.
+# kimimueller.de is served directly by the Hugo site (see apps/vps/hugo-site).
+# All other HTTP traffic is forwarded to rathole for homelab tunnelling.
 apiVersion: traefik.io/v1alpha1
-kind: IngressRouteTCP
+kind: IngressRoute
 metadata:
   name: rathole-http
   namespace: rathole
@@ -9,7 +11,11 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: HostSNI(`*`)
+    - match: PathPrefix(`/`)
+      kind: Rule
+      # Priority 1 (lowest) ensures more-specific routes, such as the Hugo site's
+      # Host(`kimimueller.de`) rule, take precedence over this catch-all.
+      priority: 1
       services:
         - name: rathole
           port: 80

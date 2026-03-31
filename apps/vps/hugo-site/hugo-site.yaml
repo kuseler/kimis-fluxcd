@@ -1,0 +1,94 @@
+# Hugo site deployment that continuously syncs content from a GitHub repository.
+# Update GITSYNC_REPO to point at your Hugo source repo.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hugo-site
+  namespace: hugo-site
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hugo-site
+  template:
+    metadata:
+      labels:
+        app: hugo-site
+    spec:
+      initContainers:
+        - name: git-sync-init
+          image: registry.k8s.io/git-sync/git-sync:v4.2.1
+          env:
+            - name: GITSYNC_REPO
+              value: "https://github.com/kuseler/kimis-site"
+            - name: GITSYNC_ROOT
+              value: /site
+            - name: GITSYNC_DEPTH
+              value: "1"
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+          volumeMounts:
+            - name: site
+              mountPath: /site
+      containers:
+        - name: git-sync
+          image: registry.k8s.io/git-sync/git-sync:v4.2.1
+          env:
+            - name: GITSYNC_REPO
+              value: "https://github.com/kuseler/kimis-site"
+            - name: GITSYNC_ROOT
+              value: /site
+            - name: GITSYNC_PERIOD
+              value: "60s"
+            - name: GITSYNC_DEPTH
+              value: "1"
+          volumeMounts:
+            - name: site
+              mountPath: /site
+        - name: hugo
+          image: hugomods/hugo:debian-base-0.159.1
+          command: ["hugo"]
+          args:
+            - server
+            - --source=/site/current
+            - --bind=0.0.0.0
+            - --port=1313
+            - --baseURL=http://kimimueller.de
+            - --appendPort=false
+          ports:
+            - containerPort: 1313
+          volumeMounts:
+            - name: site
+              mountPath: /site
+      volumes:
+        - name: site
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hugo-site
+  namespace: hugo-site
+spec:
+  selector:
+    app: hugo-site
+  ports:
+    - protocol: TCP
+      port: 1313
+      targetPort: 1313
+---
+# Route HTTP traffic for kimimueller.de directly to the Hugo site on the VPS.
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hugo-http
+  namespace: hugo-site
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`kimimueller.de`)
+      kind: Rule
+      services:
+        - name: hugo-site
+          port: 1313
