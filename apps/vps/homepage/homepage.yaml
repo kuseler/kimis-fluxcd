@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage
+      containers:
+      - name: homepage
+        image: ghcr.io/gethomepage/homepage:latest
+        env:
+        - name: HOMEPAGE_ALLOWED_HOSTS
+          value: "homepage.vps.kimimueller.de"
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        - name: kubernetes-config
+          mountPath: /app/config/kubernetes.yaml
+          subPath: kubernetes.yaml
+      volumes:
+      - name: config
+        hostPath:
+          path: /var/lib/homepage/config
+      - name: kubernetes-config
+        configMap:
+          name: homepage-kubernetes-config
+---
+# Exposed directly on port 3000 via LoadBalancer (klipper-lb assigns the node IP).
+# The VPS Traefik routes ALL port 80/443 TCP traffic to rathole, so a standard
+# Ingress cannot be used here; direct LoadBalancer exposure is the clean alternative.
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: default
+spec:
+  type: LoadBalancer
+  selector:
+    app: homepage
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
