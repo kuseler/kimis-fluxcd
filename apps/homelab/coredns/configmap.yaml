@@ -9,18 +9,22 @@ data:
         errors
         log
 
-        # 1. Match both the apex domain AND all subdomains
+        # 1. Match your specific Traefik domains FIRST
         rewrite stop name regex .*\.?homelab\.fritz\.box traefik-ingress.local
         rewrite stop name regex .*\.?homelab\.local traefik-ingress.local
 
-        # 2. Resolve them to your Traefik IP
+        # 2. Dynamically translate ANY OTHER .local domain to .fritz.box
+        # (.*) captures the hostname (like "nas") and {1} injects it into the new name
+        rewrite stop name regex (.*)\.local {1}.fritz.box
+
+        # 3. Resolve them to your Traefik IP (for the homelab rewrites above)
         hosts {
             192.168.1.80 traefik-ingress.local
             fallthrough
         }
 
-        # 3. Forward unknown queries to the Fritz!Box first, THEN Google
-        # This keeps your standard router DNS functions alive!
+        # 4. Forward unknown queries (including the newly translated .fritz.box queries)
+        # to the Fritz!Box first, THEN Google
         forward . 192.168.1.1 8.8.8.8 {
             max_concurrent 1000
         }
