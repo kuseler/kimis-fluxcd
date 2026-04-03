@@ -10,7 +10,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: nas.fritz.box 
+    server: nas.local 
     path: /volume2/Gemeinsame_Dateien
 ---
 apiVersion: v1
