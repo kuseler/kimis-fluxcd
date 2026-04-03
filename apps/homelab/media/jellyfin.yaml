@@ -27,7 +27,7 @@ spec:
           paths:
             - path: /
               pathType: Prefix
-        - host: jellyfin.homelab.local
+        - host: jellyfin.homelab.home
           paths:
             - path: /
               pathType: Prefix

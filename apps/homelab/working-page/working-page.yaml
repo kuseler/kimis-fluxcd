@@ -69,7 +69,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-  - host: homelab.local
+  - host: homelab.home
     http:
       paths:
       - path: /
@@ -99,7 +99,7 @@ spec:
             name: working-page-svc
             port:
               number: 80
-  - host: working.homelab.local
+  - host: working.homelab.home
     http:
       paths:
       - path: /

@@ -10,7 +10,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    server: nas.local 
+    server: nas.home 
     path: /volume2/Gemeinsame_Dateien
 ---
 apiVersion: v1

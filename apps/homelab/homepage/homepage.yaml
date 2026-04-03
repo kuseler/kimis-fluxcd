@@ -18,7 +18,7 @@ spec:
         image: ghcr.io/gethomepage/homepage:latest
         env:
         - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "homepage.kimimueller.de,homepage.homelab.fritz.box,homepage.homelab.local"
+          value: "homepage.kimimueller.de,homepage.homelab.fritz.box,homepage.homelab.home"
         - name: PUID
           value: "1000"
         - name: PGID
@@ -74,7 +74,7 @@ spec:
             name: homepage
             port:
               number: 3000
-  - host: homepage.homelab.local
+  - host: homepage.homelab.home
     http:
       paths:
       - path: /
