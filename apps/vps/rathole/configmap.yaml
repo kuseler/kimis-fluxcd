@@ -11,10 +11,10 @@ data:
     default_token = "${RATHOLE_TOKEN}"
 
     [server.services.http]
-    bind_addr = "0.0.0.0:80"
+    bind_addr = "0.0.0.0:8080"
 
     [server.services.https]
-    bind_addr = "0.0.0.0:443"
+    bind_addr = "0.0.0.0:8443"
 
     [server.services.fritzbox-wg]
     bind_addr = "0.0.0.0:51820"

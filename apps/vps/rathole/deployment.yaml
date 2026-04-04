@@ -27,10 +27,10 @@ spec:
               containerPort: 2333
               protocol: TCP
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
             - name: https
-              containerPort: 443
+              containerPort: 8443
               protocol: TCP
             - name: fritzbox-wg
               containerPort: 51820
