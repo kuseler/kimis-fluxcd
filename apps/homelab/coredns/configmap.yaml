@@ -6,6 +6,7 @@ metadata:
 data:
   Corefile: |
     .:53 {
+        bind 0.0.0.0 ::
         errors
         log
 
