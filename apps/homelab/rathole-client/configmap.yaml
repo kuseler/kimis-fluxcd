@@ -18,12 +18,12 @@ data:
     [client.services.http]
     # IMPORTANT: Verify this is the correct internal service name for Traefik.
     # Common names are 'traefik.traefik.svc.cluster.local' or 'traefik.kube-system.svc.cluster.local'.
-    local_addr = "traefik.traefik.svc.cluster.local:80"
+    local_addr = "traefik.kube-system.svc.cluster.local:80"
 
     # Forwards HTTPS traffic to Traefik (TCP)
     [client.services.https]
     # IMPORTANT: Verify this is the correct internal service name for Traefik.
-    local_addr = "traefik.traefik.svc.cluster.local:443"
+    local_addr = "traefik.kube-system.svc.cluster.local:443"
 
     # Forwards WireGuard traffic to your Fritz!Box (UDP)
     # CAVEAT: The Rathole pod must be able to reach this IP on your local network.
