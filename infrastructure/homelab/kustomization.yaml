@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - storage.yaml
   - jellyfin-storage.yaml
+  - adguard-storage.yaml
