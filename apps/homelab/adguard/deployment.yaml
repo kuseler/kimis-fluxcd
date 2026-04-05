@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: adguard
-        image: adguard/adguardhome:latest
+        image: adguard/adguardhome:v0.107.52
         env:
         - name: TZ
           value: Europe/Berlin
