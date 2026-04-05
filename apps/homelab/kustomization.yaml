@@ -4,5 +4,6 @@ resources:
   - media
   - rathole-client
   - coredns
+  - adguard
   - working-page
   - homepage
