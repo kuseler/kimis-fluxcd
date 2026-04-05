@@ -4,10 +4,6 @@ metadata:
   name: adguard-dns
   namespace: adguard
 spec:
-  ipFamilyPolicy: PreferDualStack
-  ipFamilies:
-  - IPv4
-  - IPv6
   selector:
     app: adguard
   ports:
@@ -19,7 +15,7 @@ spec:
     port: 53
     protocol: TCP
     targetPort: 53
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
