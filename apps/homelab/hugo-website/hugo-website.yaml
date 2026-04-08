@@ -1,0 +1,178 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hugo-website-html
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>kimimueller.de</title>
+        <style>
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1rem;
+          }
+          .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 640px;
+            width: 100%;
+            text-align: center;
+          }
+          .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #30363d;
+            margin-bottom: 1rem;
+          }
+          h1 { font-size: 1.75rem; color: #e6edf3; margin-bottom: 0.25rem; }
+          .username { color: #8b949e; font-size: 1rem; margin-bottom: 1.25rem; }
+          .bio { color: #c9d1d9; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5; }
+          .btn {
+            display: inline-block;
+            background: #238636;
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1.75rem;
+            transition: background 0.2s;
+          }
+          .btn:hover { background: #2ea043; }
+          .stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.75rem;
+          }
+          .stat { text-align: center; }
+          .stat-value { font-size: 1.2rem; font-weight: 700; color: #e6edf3; }
+          .stat-label { font-size: 0.75rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em; }
+          .github-stats-img { max-width: 100%; border-radius: 8px; margin-top: 1rem; }
+          footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #484f58;
+          }
+          footer a { color: #58a6ff; text-decoration: none; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <img
+            class="avatar"
+            src="https://github.com/kuseler.png"
+            alt="GitHub avatar"
+            onerror="this.src='https://avatars.githubusercontent.com/u/0'"
+          />
+          <h1>Kimi Mueller</h1>
+          <p class="username">@kuseler</p>
+          <p class="bio">Homelab enthusiast &amp; tinkerer. Running Kubernetes at home with FluxCD.</p>
+          <a class="btn" href="https://github.com/kuseler" target="_blank" rel="noopener noreferrer">
+            ★ View on GitHub
+          </a>
+          <img
+            class="github-stats-img"
+            src="https://github-readme-stats.vercel.app/api?username=kuseler&show_icons=true&theme=github_dark&hide_border=true"
+            alt="GitHub stats"
+          />
+          <img
+            class="github-stats-img"
+            src="https://github-readme-stats.vercel.app/api/top-langs/?username=kuseler&layout=compact&theme=github_dark&hide_border=true"
+            alt="Top languages"
+          />
+        </div>
+        <footer>
+          Hosted on <a href="https://github.com/kuseler/kimis-fluxcd" target="_blank" rel="noopener noreferrer">kimis-fluxcd</a>
+          &mdash; powered by FluxCD &amp; Kubernetes
+        </footer>
+      </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hugo-website
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hugo-website
+  template:
+    metadata:
+      labels:
+        app: hugo-website
+    spec:
+      containers:
+      - name: web
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: hugo-website-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hugo-website-svc
+  namespace: default
+spec:
+  selector:
+    app: hugo-website
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hugo-website-ingress
+  namespace: default
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: kimimueller.de
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hugo-website-svc
+            port:
+              number: 80
+  - host: homelab.home
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hugo-website-svc
+            port:
+              number: 80
