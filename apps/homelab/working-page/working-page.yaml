@@ -69,6 +69,16 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
+  - host: working.kimimueller.de
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: working-page-svc
+            port:
+              number: 80
   - host: homelab.home
     http:
       paths:

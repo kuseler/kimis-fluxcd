@@ -23,6 +23,10 @@ spec:
       enabled: true
       className: traefik
       hosts:
+        - host: jellyfin.kimimueller.de
+          paths:
+            - path: /
+              pathType: Prefix
         - host: jellyfin.homelab.fritz.box
           paths:
             - path: /
