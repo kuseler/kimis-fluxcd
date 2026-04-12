@@ -26,7 +26,7 @@ data:
 
         # 4. Forward unknown queries through AdGuard Home for ad/tracker filtering,
         # falling back to Fritz!Box and Google
-        forward . adguard-dns.adguard.svc.cluster.local 192.168.1.1 8.8.8.8 2001:4860:4860::8888 {
+        forward . 10.43.53.53 192.168.1.1 8.8.8.8 2001:4860:4860::8888 {
             max_concurrent 1000
         }
     }
