@@ -9,14 +9,15 @@ data:
         bind 0.0.0.0 ::
         errors
         log
+        reload
 
         # 1. Match your specific Traefik domains FIRST
-        rewrite stop name regex (.*\.)?homelab\.fritz\.box\. traefik-ingress.home.
-        rewrite stop name regex (.*\.)?homelab\.home\. traefik-ingress.home.
+        rewrite stop name regex (.*\.)?homelab\.fritz\.box\. traefik-ingress.home. answer auto
+        rewrite stop name regex (.*\.)?homelab\.home\. traefik-ingress.home. answer auto
 
         # 2. Dynamically translate ANY OTHER .home domain to .fritz.box
         # (.*) captures the hostname (like "nas") and {1} injects it into the new name
-        rewrite stop name regex (.*)\.home\. {1}.fritz.box.
+        rewrite stop name regex (.*)\.home\. {1}.fritz.box. answer auto
 
         # 3. Resolve them to your Traefik IP (for the homelab rewrites above)
         hosts {
