@@ -52,7 +52,6 @@ spec:
                     - name: FIREWALL_INPUT_PORTS
                       value: "8096"
                   securityContext:
-                    runAsUser: 0
                     capabilities:
                       add:
                         - NET_ADMIN
