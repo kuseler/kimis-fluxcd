@@ -48,7 +48,7 @@ spec:
                     - name: FIREWALL
                       value: "true"
                     - name: FIREWALL_OUTBOUND_SUBNETS
-                      value: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+                      value: "10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
                     - name: FIREWALL_INPUT_PORTS
                       value: "8096,8920,1900,7359"
                   resources:
