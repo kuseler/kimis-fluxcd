@@ -47,10 +47,10 @@ spec:
                           key: server
                     - name: FIREWALL
                       value: "true"
-                    # Allow cluster pod/service CIDRs while blocking direct public egress.
+                    # Allow k3s default pod/service CIDRs (10.42.0.0/16, 10.43.0.0/16) while blocking direct public egress.
                     - name: FIREWALL_OUTBOUND_SUBNETS
                       value: "10.42.0.0/16,10.43.0.0/16"
-                    # Gluetun applies FIREWALL_INPUT_PORTS to both TCP and UDP. Jellyfin: 8096, 8920, 1900, 7359.
+                    # Gluetun applies FIREWALL_INPUT_PORTS to both TCP and UDP. Jellyfin uses TCP 8096/8920 and UDP 1900/7359.
                     - name: FIREWALL_INPUT_PORTS
                       value: "8096,8920,1900,7359"
                   resources:
