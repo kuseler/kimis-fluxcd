@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   # - downloads.yaml
   - jellyfin.yaml
+  - protonvpn.yaml
   # - sonarr.yaml
   - sources.yaml
