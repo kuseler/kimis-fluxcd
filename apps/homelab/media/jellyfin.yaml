@@ -26,8 +26,6 @@ spec:
                   image: qmcgaw/gluetun:v3.39.0
                   imagePullPolicy: IfNotPresent
                   env:
-                    - name: TZ
-                      value: Europe/Berlin
                     - name: VPN_SERVICE_PROVIDER
                       value: protonvpn
                     - name: VPN_TYPE
