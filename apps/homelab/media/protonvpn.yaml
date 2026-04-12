@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: protonvpn
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: protonvpn
+  template:
+    metadata:
+      labels:
+        app: protonvpn
+    spec:
+      containers:
+        - name: gluetun
+          image: qmcgaw/gluetun:v3.39.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: protonvpn
+            - name: VPN_TYPE
+              value: openvpn
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: protonvpn-credentials
+                  key: username
+            - name: OPENVPN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: protonvpn-credentials
+                  key: password
+            - name: SERVER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: protonvpn-credentials
+                  key: server
+            - name: FIREWALL
+              value: "true"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.42.0.0/16,10.43.0.0/16"
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_LISTENING_ADDRESS
+              value: ":8888"
+            - name: SOCKSPROXY
+              value: "on"
+            - name: SOCKSPROXY_LISTENING_ADDRESS
+              value: ":8388"
+          ports:
+            - name: http-proxy
+              containerPort: 8888
+              protocol: TCP
+            - name: socks5
+              containerPort: 8388
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: protonvpn
+  namespace: media
+spec:
+  selector:
+    app: protonvpn
+  ports:
+    - name: http-proxy
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+    - name: socks5
+      port: 8388
+      targetPort: 8388
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: media-egress-via-protonvpn
+  namespace: media
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: protonvpn
+      ports:
+        - protocol: TCP
+          port: 8888
+        - protocol: TCP
+          port: 8388
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: protonvpn-allow-public-egress
+  namespace: media
+spec:
+  podSelector:
+    matchLabels:
+      app: protonvpn
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0

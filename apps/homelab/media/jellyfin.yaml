@@ -12,59 +12,6 @@ spec:
         kind: HelmRepository
         name: jellyfin-helm
         namespace: flux-system
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: Deployment
-              name: jellyfin
-            patch: |
-              - op: add
-                path: /spec/template/spec/containers/-
-                value:
-                  name: protonvpn
-                  image: qmcgaw/gluetun:v3.39.0
-                  imagePullPolicy: IfNotPresent
-                  env:
-                    - name: VPN_SERVICE_PROVIDER
-                      value: protonvpn
-                    - name: VPN_TYPE
-                      value: openvpn
-                    - name: OPENVPN_USER
-                      valueFrom:
-                        secretKeyRef:
-                          name: protonvpn-credentials
-                          key: username
-                    - name: OPENVPN_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                          name: protonvpn-credentials
-                          key: password
-                    - name: SERVER_NAME
-                      valueFrom:
-                        secretKeyRef:
-                          name: protonvpn-credentials
-                          key: server
-                    - name: FIREWALL
-                      value: "true"
-                    # Allow k3s default pod/service CIDRs (10.42.0.0/16, 10.43.0.0/16) while blocking direct public egress.
-                    - name: FIREWALL_OUTBOUND_SUBNETS
-                      value: "10.42.0.0/16,10.43.0.0/16"
-                    # Gluetun applies FIREWALL_INPUT_PORTS to both TCP and UDP. Jellyfin uses TCP 8096/8920 and UDP 1900/7359.
-                    - name: FIREWALL_INPUT_PORTS
-                      value: "8096,8920,1900,7359"
-                  resources:
-                    requests:
-                      cpu: 25m
-                      memory: 64Mi
-                    limits:
-                      cpu: 200m
-                      memory: 256Mi
-                  securityContext:
-                    capabilities:
-                      add:
-                        - NET_ADMIN
-                        - NET_RAW
   values:
     image:
       repository: ghcr.io/jellyfin/jellyfin
@@ -72,6 +19,9 @@ spec:
       pullPolicy: IfNotPresent
     env:
       TZ: Europe/Berlin
+      HTTP_PROXY: http://protonvpn.media.svc.cluster.local:8888
+      HTTPS_PROXY: http://protonvpn.media.svc.cluster.local:8888
+      NO_PROXY: 127.0.0.1,localhost,.svc,.cluster.local,10.42.0.0/16,10.43.0.0/16
     ingress:
       enabled: true
       className: traefik
