@@ -93,7 +93,12 @@ metadata:
   name: media-egress-via-protonvpn
   namespace: media
 spec:
-  podSelector: {}
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: NotIn
+        values:
+          - protonvpn
   policyTypes:
     - Egress
   egress:
