@@ -12,6 +12,51 @@ spec:
         kind: HelmRepository
         name: jellyfin-helm
         namespace: flux-system
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: jellyfin
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/-
+                value:
+                  name: protonvpn
+                  image: qmcgaw/gluetun:v3.39.0
+                  imagePullPolicy: IfNotPresent
+                  env:
+                    - name: TZ
+                      value: Europe/Berlin
+                    - name: VPN_SERVICE_PROVIDER
+                      value: protonvpn
+                    - name: VPN_TYPE
+                      value: openvpn
+                    - name: OPENVPN_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: protonvpn-credentials
+                          key: username
+                    - name: OPENVPN_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: protonvpn-credentials
+                          key: password
+                    - name: SERVER_NAME
+                      valueFrom:
+                        secretKeyRef:
+                          name: protonvpn-credentials
+                          key: server
+                    - name: FIREWALL
+                      value: "on"
+                    - name: FIREWALL_INPUT_PORTS
+                      value: "8096"
+                  securityContext:
+                    runAsUser: 0
+                    capabilities:
+                      add:
+                        - NET_ADMIN
+                        - NET_RAW
   values:
     image:
       repository: ghcr.io/jellyfin/jellyfin
