@@ -50,7 +50,14 @@ spec:
                     - name: FIREWALL
                       value: "on"
                     - name: FIREWALL_INPUT_PORTS
-                      value: "8096"
+                      value: "8096,8920,1900,7359"
+                  resources:
+                    requests:
+                      cpu: 25m
+                      memory: 64Mi
+                    limits:
+                      cpu: 200m
+                      memory: 256Mi
                   securityContext:
                     capabilities:
                       add:
