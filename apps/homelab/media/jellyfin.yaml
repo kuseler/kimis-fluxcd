@@ -47,8 +47,10 @@ spec:
                           key: server
                     - name: FIREWALL
                       value: "true"
+                    # Allow cluster pod/service CIDRs and local RFC1918 LAN while blocking direct public egress.
                     - name: FIREWALL_OUTBOUND_SUBNETS
                       value: "10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
+                    # Jellyfin ports: 8096 (HTTP), 8920 (HTTPS), 1900/UDP (DLNA), 7359/UDP (discovery).
                     - name: FIREWALL_INPUT_PORTS
                       value: "8096,8920,1900,7359"
                   resources:
