@@ -46,7 +46,7 @@ spec:
                           name: protonvpn-credentials
                           key: server
                     - name: FIREWALL
-                      value: "on"
+                      value: "true"
                     - name: FIREWALL_INPUT_PORTS
                       value: "8096,8920,1900,7359"
                   resources:
