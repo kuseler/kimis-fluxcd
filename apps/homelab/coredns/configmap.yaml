@@ -24,9 +24,8 @@ data:
             fallthrough
         }
 
-        # 4. Forward unknown queries through AdGuard Home for ad/tracker filtering,
-        # falling back to Fritz!Box and Google
-        forward . 10.43.53.53 192.168.1.1 8.8.8.8 2001:4860:4860::8888 {
+        # 4. Forward unknown queries to Fritz!Box and Google
+        forward . 192.168.1.1 8.8.8.8 2001:4860:4860::8888 {
             max_concurrent 1000
         }
     }
