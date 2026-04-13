@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: threadfin
-        image: fyb3roptik/threadfin:latest
+        image: fyb3roptik/threadfin:1.2.37
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -45,10 +45,12 @@ spec:
             memory: 1Gi
         securityContext:
           allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: false
+          readOnlyRootFilesystem: true
         volumeMounts:
         - name: config
           mountPath: /home/threadfin/conf
+        - name: tmp
+          mountPath: /tmp
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -58,6 +60,8 @@ spec:
       - name: config
         persistentVolumeClaim:
           claimName: threadfin-config-pvc
+      - name: tmp
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
