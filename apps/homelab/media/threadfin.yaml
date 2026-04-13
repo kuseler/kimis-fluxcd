@@ -47,6 +47,8 @@ spec:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
         volumeMounts:
+        - name: home
+          mountPath: /home/threadfin
         - name: config
           mountPath: /home/threadfin/conf
         - name: tmp
@@ -57,6 +59,8 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
       volumes:
+      - name: home
+        emptyDir: {}
       - name: config
         persistentVolumeClaim:
           claimName: threadfin-config-pvc
