@@ -1,0 +1,112 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: threadfin-config-pvc
+  namespace: media
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: threadfin
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: threadfin
+  template:
+    metadata:
+      labels:
+        app: threadfin
+    spec:
+      containers:
+      - name: threadfin
+        image: fyb3roptik/threadfin:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 34400
+        env:
+        - name: TZ
+          value: Europe/Berlin
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+        volumeMounts:
+        - name: config
+          mountPath: /home/threadfin/conf
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: threadfin-config-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: threadfin
+  namespace: media
+spec:
+  selector:
+    app: threadfin
+  ports:
+  - protocol: TCP
+    port: 34400
+    targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: threadfin-ingress
+  namespace: media
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: threadfin.kimimueller.de
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: threadfin
+            port:
+              number: 34400
+  - host: threadfin.homelab.fritz.box
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: threadfin
+            port:
+              number: 34400
+  - host: threadfin.homelab.home
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: threadfin
+            port:
+              number: 34400
