@@ -22,6 +22,12 @@ spec:
     ingress:
       enabled: true
       className: traefik
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/name: "Jellyfin"
+        gethomepage.dev/description: "Media Server"
+        gethomepage.dev/group: "Media"
+        gethomepage.dev/icon: "jellyfin.png"
       hosts:
         - host: jellyfin.kimimueller.de
           paths:

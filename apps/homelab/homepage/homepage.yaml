@@ -13,6 +13,7 @@ spec:
       labels:
         app: homepage
     spec:
+      serviceAccountName: homepage
       containers:
       - name: homepage
         image: ghcr.io/gethomepage/homepage:latest
@@ -28,10 +29,16 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /app/config
+        - name: kubernetes-config
+          mountPath: /app/config/kubernetes.yaml
+          subPath: kubernetes.yaml
       volumes:
       - name: config
         hostPath:
           path: /var/lib/homepage/config
+      - name: kubernetes-config
+        configMap:
+          name: homepage-kubernetes-config
 ---
 apiVersion: v1
 kind: Service
@@ -51,6 +58,12 @@ kind: Ingress
 metadata:
   name: homepage-ingress
   namespace: default
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Homepage"
+    gethomepage.dev/description: "A modern, secure, highly customizable application dashboard"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "homepage.png"
 spec:
   ingressClassName: traefik
   rules:
