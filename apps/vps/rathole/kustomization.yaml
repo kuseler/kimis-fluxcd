@@ -3,7 +3,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - configmap.yaml
   - deployment.yaml
   - service.yaml
   - service-external.yaml
+
+configMapGenerator:
+  - name: rathole-server-config
+    namespace: rathole
+    files:
+      - rathole.toml=rathole-server.toml
