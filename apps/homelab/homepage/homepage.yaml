@@ -51,10 +51,16 @@ kind: Ingress
 metadata:
   name: homepage-ingress
   namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - homepage.kimimueller.de
   rules:
-  - host: homepage.kimimueller.de
+    - host: homepage.kimimueller.de
     http:
       paths:
       - path: /
