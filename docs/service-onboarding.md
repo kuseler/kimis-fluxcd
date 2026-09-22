@@ -25,51 +25,71 @@ Before writing manifests, determine where the service should be reachable:
 1. Create directory `apps/homelab/<service-name>/`.
 2. Add your deployment or HelmRelease:
    * For Helm charts: create `sources.yaml` (HelmRepository) and `<service>.yaml` (HelmRelease).
-   * For standard manifests: create `deployment.yaml`, `service.yaml`, and `ingress.yaml`.
-3. In your `ingress.yaml` (or Helm chart `ingress` section), specify `ingressClassName: traefik` and define the required hostnames:
+   * For standard manifests: create `deployment.yaml` and `service.yaml`.
+3. Ingress Configuration (Split Ingress Pattern):
+   * To allow remote access while keeping local LAN access completely unhindered and bypassed, define two separate Ingress manifests:
+   
+   **`ingress-remote.yaml` (Public with Authelia Forward-Auth Protection)**:
+   ```yaml
+   apiVersion: networking.k8s.io/v1
+   kind: Ingress
+   metadata:
+     name: example-app-remote
+     namespace: default
+     annotations:
+       traefik.ingress.kubernetes.io/router.entryPoints: websecure
+       traefik.ingress.kubernetes.io/router.tls: "true"
+       # Attach Authelia Forward-Auth middleware from the 'authelia' namespace:
+       traefik.ingress.kubernetes.io/router.middlewares: authelia-authelia-forwardauth@kubernetescrd
+   spec:
+     ingressClassName: traefik
+     rules:
+       - host: example.kimimueller.de
+         http:
+           paths:
+             - path: /
+               pathType: Prefix
+               backend:
+                 service:
+                   name: example-app
+                   port:
+                     number: 8080
+   ```
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: example-app
-  namespace: default
-spec:
-  ingressClassName: traefik
-  rules:
-    # Public domain (if public exposure is desired)
-    - host: example.kimimueller.de
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: example-app
-                port:
-                  number: 8080
-    # Internal LAN domains
-    - host: example.homelab.home
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: example-app
-                port:
-                  number: 8080
-    - host: example.homelab.fritz.box
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: example-app
-                port:
-                  number: 8080
-```
+   **`ingress-local.yaml` (Internal LAN / VPN - Completely Bypassed)**:
+   ```yaml
+   apiVersion: networking.k8s.io/v1
+   kind: Ingress
+   metadata:
+     name: example-app-local
+     namespace: default
+     annotations:
+       traefik.ingress.kubernetes.io/router.entryPoints: web,websecure
+       # NOTE: No Authelia middleware annotation here!
+   spec:
+     ingressClassName: traefik
+     rules:
+       - host: example.homelab.home
+         http:
+           paths:
+             - path: /
+               pathType: Prefix
+               backend:
+                 service:
+                   name: example-app
+                   port:
+                     number: 8080
+       - host: example.homelab.fritz.box
+         http:
+           paths:
+             - path: /
+               pathType: Prefix
+               backend:
+                 service:
+                   name: example-app
+                   port:
+                     number: 8080
+   ```
 
 4. Create `apps/homelab/<service-name>/kustomization.yaml`:
 ```yaml

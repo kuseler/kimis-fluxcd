@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authelia
+  namespace: authelia
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: authelia
+      version: "0.11.x"
+      sourceRef:
+        kind: HelmRepository
+        name: authelia
+        namespace: flux-system
+  values:
+    pod:
+      kind: Deployment
+      replicas: 1
+      extraVolumes:
+        - name: users-database
+          secret:
+            secretName: authelia-secrets
+            items:
+              - key: users_database.yml
+                path: users_database.yml
+      extraVolumeMounts:
+        - name: users-database
+          mountPath: /config/users_database.yml
+          subPath: users_database.yml
+          readOnly: true
+    configMap:
+      theme: light
+      server:
+        endpoints:
+          authz:
+            forward-auth:
+              implementation: ForwardAuth
+      session:
+        remember_me: 1 month
+        cookies:
+          - domain: kimimueller.de
+            subdomain: auth
+            default_redirection_url: https://auth.kimimueller.de
+            name: authelia_session
+            same_site: lax
+            expiration: 1 hour
+            inactivity: 5 minutes
+      storage:
+        local:
+          enabled: true
+          path: /config/db.sqlite3
+      authentication_backend:
+        file:
+          enabled: true
+          path: /config/users_database.yml
+          watch: true
+      notifier:
+        filesystem:
+          enabled: true
+          filename: /config/notification.txt
+      access_control:
+        default_policy: deny
+        rules:
+          # Allow unauthenticated access to the Authelia portal itself
+          - domain: auth.kimimueller.de
+            policy: bypass
+          # LAN & Internal network bypass (requests from homelab subnet / VPN / pod CIDR)
+          - domain: "*.kimimueller.de"
+            networks:
+              - 192.168.1.0/24  # Homelab LAN subnet
+              - 10.42.0.0/16    # K3s Pod CIDR
+              - 10.43.0.0/16    # K3s Service CIDR
+            policy: bypass
+          # Remote external requests via Rathole tunnel require 1FA (SSO session cookie)
+          - domain: "*.kimimueller.de"
+            policy: one_factor
+    secret:
+      existingSecret: authelia-secrets
+    persistence:
+      enabled: true
+      size: 1Gi

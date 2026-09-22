@@ -24,8 +24,13 @@ Because the Homelab is behind a NAT, public traffic enters through the VPS and i
     *   **Client (Homelab)**: Receives the tunneled data and forwards it to local endpoints.
 3.  **Homelab Ingress (Homelab Traefik)**:
     *   The Rathole Client forwards HTTP/HTTPS traffic to the Homelab's Traefik instance (`traefik.kube-system.svc.cluster.local`).
-    *   Homelab Traefik acts as the actual L7 Ingress Controller. It reads the Host headers/SNI (e.g., `homepage.kimimueller.de`) and routes traffic to the correct Homelab pods based on standard Kubernetes `Ingress` resources.
-4.  **Wireguard Traffic (UDP)**:
+    *   Homelab Traefik acts as the actual L7 Ingress Controller. It reads Host headers and routes traffic according to Kubernetes `Ingress` resources.
+4.  **Forward Authentication (Authelia)**:
+    *   Remote Ingress resources (`*.kimimueller.de`) carry the `authelia-authelia-forwardauth@kubernetescrd` middleware annotation.
+    *   Traefik triggers an auth subrequest to Authelia (`/api/authz/forward-auth`).
+    *   Unauthenticated requests are redirected (HTTP 302) to `https://auth.kimimueller.de`. Once authenticated, users receive an SSO session cookie (`authelia_session`) valid across all subdomains.
+    *   Local requests (`*.homelab.home`, `*.homelab.fritz.box`) match local Ingress resources with no middleware attached, completely bypassing Authelia.
+5.  **Wireguard Traffic (UDP)**:
     *   UDP port 51820 hits the VPS `rathole-external` LoadBalancer, goes through Rathole, and is forwarded directly to the Fritz!Box router (`192.168.1.1:50571`) by the Rathole Client.
 
 ---

@@ -66,3 +66,8 @@ Agents are explicitly authorized and expected to keep this repository self-docum
   * Any UDP service (e.g., WireGuard) must explicitly declare `type = "udp"` in both server and client configurations; otherwise Rathole defaults to TCP and drops data channels.
 * **CoreDNS Forwarding**:
   * CoreDNS forwarders should support dual-stack (IPv4 & IPv6) where applicable.
+* **Authelia ForwardAuth with Traefik**:
+  * Cross-namespace Traefik middleware references use the `<namespace>-<name>@kubernetescrd` syntax (e.g. `authelia-authelia-forwardauth@kubernetescrd`).
+  * Authelia's ForwardAuth endpoint for Traefik is `/api/authz/forward-auth` (replaces legacy `/api/verify`).
+  * Do NOT attach the ForwardAuth middleware to the Authelia portal Ingress itself, as this creates an infinite redirect loop.
+  * To bypass Authelia for LAN/VPN traffic cleanly without middleware execution overhead, split application ingresses into remote (`*.kimimueller.de` with middleware) and local (`*.homelab.home`, `*.homelab.fritz.box` without middleware).

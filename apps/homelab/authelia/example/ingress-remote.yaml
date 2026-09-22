@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami-remote
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entryPoints: websecure
+    # Forward-Auth Middleware from authelia namespace (<namespace>-<middleware>@kubernetescrd)
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-authelia-forwardauth@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: whoami.kimimueller.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80

@@ -78,6 +78,43 @@ kubectl create secret generic traefik-acme-email \
   --from-literal=email="<YOUR_LETSENCRYPT_EMAIL>"
 ```
 
+### 3.3 Authelia Secrets & User Database
+Authelia requires cryptographic keys for JWT, session cookies, storage encryption, and the initial user database in the `authelia` namespace:
+
+```bash
+kubectl create namespace authelia --dry-run=client -o yaml | kubectl apply -f -
+
+# Generate keys:
+JWT_SECRET=$(openssl rand -hex 32)
+SESSION_KEY=$(openssl rand -hex 32)
+STORAGE_KEY=$(openssl rand -hex 32)
+
+# Generate password hash:
+HASHED_PASSWORD=$(docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password "<YOUR_PASSWORD>" | awk '{print $NF}')
+
+# Create temporary user database:
+cat <<EOF > /tmp/users_database.yml
+users:
+  kimi:
+    disabled: false
+    displayname: "Kimi Müller"
+    password: "${HASHED_PASSWORD}"
+    email: "kimi@kimimueller.de"
+    groups:
+      - admins
+      - dev
+EOF
+
+# Create secret:
+kubectl -n authelia create secret generic authelia-secrets \
+  --from-literal=identity_validation.reset_password.jwt.hmac.key="${JWT_SECRET}" \
+  --from-literal=session.encryption.key="${SESSION_KEY}" \
+  --from-literal=storage.encryption.key="${STORAGE_KEY}" \
+  --from-file=users_database.yml=/tmp/users_database.yml
+
+rm -f /tmp/users_database.yml
+```
+
 ---
 
 ## 4. TLS & Certificate Architecture

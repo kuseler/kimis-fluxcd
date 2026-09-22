@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami-local
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entryPoints: web,websecure
+    # IMPORTANT: No Authelia middleware attached.
+    # Local LAN / VPN requests bypass Authelia authentication entirely.
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: whoami.homelab.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80
+    - host: whoami.homelab.fritz.box
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80
