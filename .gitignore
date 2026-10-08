@@ -1,0 +1,13 @@
+# Environment variables & local secrets
+.env
+.env.*
+*.env
+
+# Age keys
+*.agekey
+keys.txt
+
+# Temporary / OS files
+.DS_Store
+*.swp
+*~
