@@ -19,8 +19,8 @@ spec:
         - name: ghcr-auth
       containers:
         - name: hugo
-          image: ghcr.io/kuseler/hugo-blog:ee03cc14e95fdf022256483f23e1747496608289
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/kuseler/hugo-blog:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
