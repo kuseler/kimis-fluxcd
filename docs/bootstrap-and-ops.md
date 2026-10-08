@@ -70,9 +70,10 @@ kubectl create secret generic rathole-token \
 ```
 
 ### 3.2 Traefik ACME Let's Encrypt Email Secret
-Homelab Traefik requires an ACME registration email secret to obtain Let's Encrypt TLS certificates without exposing personal email addresses in Git:
+Both Homelab and VPS Traefik require an ACME registration email secret to obtain Let's Encrypt TLS certificates without exposing personal email addresses in Git:
 
 ```bash
+# Create on Homelab cluster and VPS cluster:
 kubectl create secret generic traefik-acme-email \
   --namespace=kube-system \
   --from-literal=email="<YOUR_LETSENCRYPT_EMAIL>"
@@ -83,10 +84,10 @@ kubectl create secret generic traefik-acme-email \
 ## 4. TLS & Certificate Architecture
 
 * **Edge (VPS)**: 
-  * VPS Traefik operates in **TCP/TLS Passthrough** mode (`IngressRouteTCP`). It terminates neither HTTP nor TLS connections.
+  * Directly serves `kimimueller.de` (Hugo Blog) with local TLS termination via Let's Encrypt (`IngressRoute` with ACME HTTP challenge).
+  * Routes all Homelab subdomains (`*.kimimueller.de`) to Rathole using **TCP/TLS Passthrough** (`IngressRouteTCP`).
 * **Internal (Homelab)**:
-  * Homelab Traefik handles TLS termination.
-  * Let's Encrypt certificates are acquired/managed at the Homelab Traefik layer (or via ACME resolver on Homelab).
+  * Homelab Traefik handles TLS termination for tunneled workloads (`*.kimimueller.de`) via its own Let's Encrypt resolver.
 
 ---
 

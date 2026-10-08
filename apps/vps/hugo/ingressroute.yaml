@@ -1,0 +1,32 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hugo-http
+  namespace: hugo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`kimimueller.de`) || Host(`www.kimimueller.de`)
+      kind: Rule
+      priority: 10
+      services:
+        - name: hugo
+          port: 80
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: hugo-https
+  namespace: hugo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`kimimueller.de`) || Host(`www.kimimueller.de`)
+      kind: Rule
+      services:
+        - name: hugo
+          port: 80
+  tls:
+    certResolver: letsencrypt
