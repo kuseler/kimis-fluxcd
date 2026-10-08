@@ -17,8 +17,8 @@ The architecture consists of two environments securely connected via a **Rathole
 Because the Homelab is behind a NAT, public traffic enters through the VPS and is tunneled to the Homelab.
 
 1.  **Public Edge (VPS Traefik)**:
-    *   Traffic for `*.kimimueller.de` hits the VPS.
-    *   Traefik on the VPS is configured with `IngressRouteTCP` (TLS Passthrough for 443, raw TCP for 80). It does **not** do L7 routing. It forwards all web traffic blindly to the Rathole server.
+    *   Traffic for `kimimueller.de` and `www.kimimueller.de` is terminated directly on the VPS by Hugo's `IngressRoute` with Let's Encrypt TLS.
+    *   Traffic for Homelab subdomains (`*.kimimueller.de`) is routed via Traefik to the Rathole server (using TLS Passthrough for 443 and fallback HTTP routing for 80).
 2.  **The Tunnel (Rathole Server & Client)**:
     *   **Server (VPS)**: Listens on ports 8080 (HTTP), 8443 (HTTPS), and 51820 (WireGuard UDP). Tunnels data over a control channel (port 2333) to the Homelab.
     *   **Client (Homelab)**: Receives the tunneled data and forwards it to local endpoints.

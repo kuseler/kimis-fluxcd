@@ -21,8 +21,8 @@ This is a multi-cluster GitOps repository managed by **FluxCD**:
 * **Public Domain**: Target address is `kimimueller.de`.
 * **NAT Traversal**: Services hosted on the `homelab` cluster are tunneled to the public `vps` cluster using **Rathole**.
 * **Ingress (Dual-Traefik Setup)**: 
-  * **VPS Traefik**: Acts purely as a TCP/TLS passthrough, blindly forwarding web traffic to the Rathole server.
-  * **Homelab Traefik**: Acts as the actual L7 Ingress Controller, receiving tunneled traffic from the Rathole client and routing it to the correct pods based on HTTP hostnames.
+  * **VPS Traefik**: Terminates TLS locally for the apex domain `kimimueller.de` (Hugo Blog) via Let's Encrypt. Forwards all other web traffic (`*.kimimueller.de`) via TCP/TLS passthrough to the Rathole server.
+  * **Homelab Traefik**: Acts as the L7 Ingress Controller for homelab services, receiving tunneled traffic from the Rathole client and terminating TLS locally.
 
 ---
 
@@ -66,3 +66,5 @@ Agents are explicitly authorized and expected to keep this repository self-docum
   * Any UDP service (e.g., WireGuard) must explicitly declare `type = "udp"` in both server and client configurations; otherwise Rathole defaults to TCP and drops data channels.
 * **CoreDNS Forwarding**:
   * CoreDNS forwarders should support dual-stack (IPv4 & IPv6) where applicable.
+* **Traefik Edge Routing Split (VPS)**:
+  * When hosting edge workloads (like Hugo) on the VPS alongside Rathole TLS passthrough, the TCP passthrough router (`rathole-https`) must not use a broad `HostSNI('*')`. It must explicitly match subdomains (`HostSNI('*.kimimueller.de', '*.*.kimimueller.de')`) so that apex domain TLS connections are terminated by Traefik rather than forwarded blindly.
