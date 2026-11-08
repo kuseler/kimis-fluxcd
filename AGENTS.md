@@ -38,6 +38,10 @@ This is a multi-cluster GitOps repository managed by **FluxCD**:
 3. **Documentation Placement**:
    * Place architecture guides, setup walkthroughs, and operational runbooks in `docs/`.
    * Keep manifest directories clean of standalone documentation files unless explicitly requested.
+4. **Git Workflow — No Direct Pushes to `main`**:
+   * Never push commits directly to the `main` branch.
+   * Always create and work on dedicated feature or bugfix branches (e.g. `feat/<topic>`, `fix/<topic>`, where patterns like `fix/xyz` are meant purely as illustrative placeholders).
+   * Submit changes via Pull Requests for review before Flux reconciles `main` into the clusters.
 
 ---
 
