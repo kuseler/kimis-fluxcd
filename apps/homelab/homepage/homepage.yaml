@@ -32,6 +32,15 @@ spec:
         - name: k8s-config
           mountPath: /app/config/kubernetes.yaml
           subPath: kubernetes.yaml
+        - name: k8s-config
+          mountPath: /app/config/settings.yaml
+          subPath: settings.yaml
+        - name: k8s-config
+          mountPath: /app/config/widgets.yaml
+          subPath: widgets.yaml
+        - name: k8s-config
+          mountPath: /app/config/services.yaml
+          subPath: services.yaml
       volumes:
       - name: config
         hostPath:
@@ -58,25 +67,9 @@ kind: Ingress
 metadata:
   name: homepage-ingress
   namespace: default
-  annotations:
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
 spec:
   ingressClassName: traefik
-  tls:
-    - hosts:
-        - homepage.kimimueller.de
   rules:
-  - host: homepage.kimimueller.de
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: homepage
-            port:
-              number: 3000
   - host: homepage.homelab.fritz.box
     http:
       paths:
@@ -88,6 +81,31 @@ spec:
             port:
               number: 3000
   - host: homepage.homelab.home
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: homepage
+            port:
+              number: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage-ingress-public
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - homepage.kimimueller.de
+  rules:
+  - host: homepage.kimimueller.de
     http:
       paths:
       - path: /
