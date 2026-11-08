@@ -6,7 +6,31 @@ metadata:
 data:
   kubernetes.yaml: |
     mode: cluster
+    ingress: true
+    traefik: true
   settings.yaml: |
     title: Homelab
     theme: dark
     color: slate
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "homelab"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - resources:
+        cpu: true
+        memory: true
+        disk: /
+    - search:
+        provider: duckduckgo
+        target: _blank
+  services.yaml: |
+    []

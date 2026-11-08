@@ -38,6 +38,10 @@ This is a multi-cluster GitOps repository managed by **FluxCD**:
 3. **Documentation Placement**:
    * Place architecture guides, setup walkthroughs, and operational runbooks in `docs/`.
    * Keep manifest directories clean of standalone documentation files unless explicitly requested.
+4. **Git Workflow — No Direct Pushes to `main`**:
+   * Never push commits directly to the `main` branch.
+   * Always create and work on dedicated feature or bugfix branches (e.g. `feat/<topic>`, `fix/<topic>`, where patterns like `fix/xyz` are meant purely as illustrative placeholders).
+   * Submit changes via Pull Requests for review before Flux reconciles `main` into the clusters.
 
 ---
 
@@ -68,3 +72,8 @@ Agents are explicitly authorized and expected to keep this repository self-docum
   * CoreDNS forwarders should support dual-stack (IPv4 & IPv6) where applicable.
 * **Traefik Edge Routing Split (VPS)**:
   * When hosting edge workloads (like Hugo) on the VPS alongside Rathole TLS passthrough, the TCP passthrough router (`rathole-https`) must not use a broad `HostSNI('*')`. It must explicitly match subdomains (`HostSNI('*.kimimueller.de', '*.*.kimimueller.de')`) so that apex domain TLS connections are terminated by Traefik rather than forwarded blindly.
+* **Internal vs. Public Ingress Resource Separation**:
+  * Do not combine internal LAN hostnames (`*.homelab.fritz.box`, `*.homelab.home`) with public Let's Encrypt TLS annotations (`traefik.ingress.kubernetes.io/router.tls: "true"` or `certresolver: letsencrypt`) on the same `Ingress` resource. Traefik annotations apply to the entire resource, which removes the port 80 HTTP router (returning 404) and attempts ACME challenges for non-public domains. Separate public and local endpoints into distinct `Ingress` manifests.
+* **Homepage Ingress Discovery & ConfigMounts**:
+  * Homepage in `mode: cluster` requires `ingress: true` in `kubernetes.yaml` to discover Ingress resources annotated with `gethomepage.dev/enabled: "true"`.
+  * Mount individual configuration files (`kubernetes.yaml`, `settings.yaml`, `widgets.yaml`, `services.yaml`) via `subPath` so `/app/config/logs` remains writable on the container filesystem.

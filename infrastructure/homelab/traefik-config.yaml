@@ -16,6 +16,7 @@ spec:
           secretKeyRef:
             name: traefik-acme-email
             key: email
+            optional: true
     additionalArguments:
       - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
