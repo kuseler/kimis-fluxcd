@@ -1,0 +1,302 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: downloads
+  namespace: media
+  labels:
+    app: downloads
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: downloads
+  template:
+    metadata:
+      labels:
+        app: downloads
+    spec:
+      initContainers:
+        # Gluetun VPN Gateway & Killswitch (ProtonVPN) as a native Kubernetes sidecar.
+        # StartupProbe ensures the VPN tunnel and iptables killswitch are active before
+        # sabnzbd and qbittorrent containers start.
+        - name: gluetun
+          image: qmcgaw/gluetun:v3.40.0
+          imagePullPolicy: IfNotPresent
+          restartPolicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: protonvpn
+            - name: VPN_TYPE
+              value: wireguard
+            - name: WIREGUARD_ADDRESSES
+              value: "10.2.0.2/32"
+            - name: SERVER_COUNTRIES
+              value: "Germany"
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: proton-vpn-secret
+                  key: private-key
+                  optional: true
+            - name: OPENVPN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: proton-vpn-secret
+                  key: username
+                  optional: true
+            - name: OPENVPN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: proton-vpn-secret
+                  key: password
+                  optional: true
+            # Killswitch: block all non-VPN traffic except explicit cluster/LAN CIDRs
+            - name: FIREWALL
+              value: "on"
+            - name: FIREWALL_OUTBOUND_SUBNETS
+              value: "10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
+            - name: FIREWALL_INPUT_PORTS
+              value: "8080,8081"
+            - name: HTTPPROXY
+              value: "on"
+            - name: HTTPPROXY_LISTENING_ADDRESS
+              value: ":8888"
+            - name: SOCKSPROXY
+              value: "on"
+            - name: SOCKSPROXY_LISTENING_ADDRESS
+              value: ":8388"
+            - name: DOT
+              value: "off"
+          ports:
+            - name: sabnzbd-http
+              containerPort: 8080
+              protocol: TCP
+            - name: qbit-http
+              containerPort: 8081
+              protocol: TCP
+            - name: http-proxy
+              containerPort: 8888
+              protocol: TCP
+            - name: socks5
+              containerPort: 8388
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            exec:
+              command:
+                - /gluetun-entrypoint
+                - healthcheck
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+
+      containers:
+        # SABnzbd Usenet (NZB) Downloader
+        - name: sabnzbd
+          image: lscr.io/linuxserver/sabnzbd:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Berlin
+          volumeMounts:
+            - name: sabnzbd-config
+              mountPath: /config
+            - name: media
+              mountPath: /media
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+
+        # qBittorrent Torrent Downloader
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Berlin
+            - name: WEBUI_PORT
+              value: "8081"
+            - name: TORRENTING_PORT
+              value: "6881"
+          volumeMounts:
+            - name: qbittorrent-config
+              mountPath: /config
+            - name: media
+              mountPath: /media
+          readinessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+      volumes:
+        - name: sabnzbd-config
+          persistentVolumeClaim:
+            claimName: sabnzbd-config-pvc
+        - name: qbittorrent-config
+          persistentVolumeClaim:
+            claimName: qbittorrent-config-pvc
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-nfs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sabnzbd
+  namespace: media
+  labels:
+    app: sabnzbd
+spec:
+  selector:
+    app: downloads
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: http-proxy
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+    - name: socks5
+      port: 8388
+      targetPort: 8388
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  namespace: media
+  labels:
+    app: qbittorrent
+spec:
+  selector:
+    app: downloads
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sabnzbd
+  namespace: media
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "SABnzbd"
+    gethomepage.dev/description: "Usenet NZB Downloader (ProtonVPN)"
+    gethomepage.dev/group: "Downloads"
+    gethomepage.dev/icon: "sabnzbd.png"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: sabnzbd.homelab.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sabnzbd
+                port:
+                  number: 8080
+    - host: sabnzbd.homelab.fritz.box
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sabnzbd
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qbittorrent
+  namespace: media
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "qBittorrent"
+    gethomepage.dev/description: "Torrent Downloader (ProtonVPN)"
+    gethomepage.dev/group: "Downloads"
+    gethomepage.dev/icon: "qbittorrent.png"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: qbittorrent.homelab.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbittorrent
+                port:
+                  number: 8081
+    - host: qbittorrent.homelab.fritz.box
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbittorrent
+                port:
+                  number: 8081

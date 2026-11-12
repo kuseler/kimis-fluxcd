@@ -1,7 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  # - downloads.yaml
-  - jellyfin.yaml
-  # - sonarr.yaml
   - sources.yaml
+  - jellyfin.yaml
+  - downloads.yaml
+  - sonarr.yaml
+  - radarr.yaml
+  - prowlarr.yaml
+  - bazarr.yaml
+  - lidarr.yaml
+  - readarr.yaml
