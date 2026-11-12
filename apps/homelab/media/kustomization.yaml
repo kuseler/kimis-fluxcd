@@ -7,5 +7,6 @@ resources:
   - sonarr.yaml
   - radarr.yaml
   - prowlarr.yaml
+  - flaresolverr.yaml
   - bazarr.yaml
   - lidarr.yaml
