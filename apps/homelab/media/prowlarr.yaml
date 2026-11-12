@@ -63,6 +63,10 @@ metadata:
   labels:
     app: prowlarr
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6
   selector:
     app: prowlarr
   ports:
