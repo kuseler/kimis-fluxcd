@@ -4,4 +4,5 @@ resources:
   - namespace.yaml
   - storage.yaml
   - jellyfin-storage.yaml
+  - media-storage.yaml
   - traefik-config.yaml
