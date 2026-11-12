@@ -68,6 +68,10 @@ metadata:
   labels:
     app: radarr
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6
   selector:
     app: radarr
   ports:

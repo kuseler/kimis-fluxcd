@@ -68,6 +68,10 @@ metadata:
   labels:
     app: bazarr
 spec:
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6
   selector:
     app: bazarr
   ports:
