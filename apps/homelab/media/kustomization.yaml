@@ -9,4 +9,3 @@ resources:
   - prowlarr.yaml
   - bazarr.yaml
   - lidarr.yaml
-  - readarr.yaml

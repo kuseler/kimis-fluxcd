@@ -16,7 +16,6 @@ This document describes the media automation, downloaders, and VPN killswitch ar
 | **Prowlarr** | Indexer manager & proxy | `http://prowlarr.media.svc.cluster.local:9696` | `prowlarr.homelab.home`, `prowlarr.homelab.fritz.box` |
 | **Bazarr** | Subtitle automation (Sonarr/Radarr) | `http://bazarr.media.svc.cluster.local:6767` | `bazarr.homelab.home`, `bazarr.homelab.fritz.box` |
 | **Lidarr** | Music library automation | `http://lidarr.media.svc.cluster.local:8686` | `lidarr.homelab.home`, `lidarr.homelab.fritz.box` |
-| **Readarr** | Book & comic automation | `http://readarr.media.svc.cluster.local:8787` | `readarr.homelab.home`, `readarr.homelab.fritz.box` |
 | **Jellyfin** | Media streaming server | `http://jellyfin.media.svc.cluster.local:8096` | `jellyfin.homelab.home`, `jellyfin.homelab.fritz.box` |
 
 ---
@@ -47,10 +46,9 @@ If using OpenVPN instead of WireGuard, switch `VPN_TYPE` to `openvpn` in `apps/h
 ## 3. Storage Layout
 
 * **Config Storage**: Each application uses a dedicated `ReadWriteOnce` PVC (`2Gi`) defined in `infrastructure/homelab/media-storage.yaml`.
-* **Shared Media & Downloads (`media-nfs-pvc`)**: Mounted at `/media` on Jellyfin, SABnzbd, qBittorrent, Sonarr, Radarr, Bazarr, Lidarr, and Readarr (`PUID=1000`, `PGID=1000`). Keeping downloads and media on the same NFS mount allows atomic moves/hardlinks:
+* **Shared Media & Downloads (`media-nfs-pvc`)**: Mounted at `/media` on Jellyfin, SABnzbd, qBittorrent, Sonarr, Radarr, Bazarr, and Lidarr (`PUID=1000`, `PGID=1000`). Keeping downloads and media on the same NFS mount allows atomic moves/hardlinks:
   * `/media/downloads/incomplete`
   * `/media/downloads/complete`
   * `/media/movies`
   * `/media/tv`
   * `/media/music`
-  * `/media/books`
