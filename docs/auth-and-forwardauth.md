@@ -16,7 +16,7 @@ We employ **Option B (Selective Traefik Middleware via Dedicated Ingress Resourc
   2. **Local Ingress (`*.homelab.home`, `*.homelab.fritz.box`)**: Configured without any auth middleware annotations.
 * **Zero Overhead & Total Bypass for LAN/VPN**:
   * When accessed locally via `*.homelab.home`, Traefik matches the local Ingress router which does not have the middleware attached. The request goes straight to the backend pod without any subrequest to Authelia.
-  * For defense-in-depth, Authelia's `access_control` configuration also designates the local LAN (`192.168.1.0/24`) and Kubernetes network (`10.42.0.0/16`, `10.43.0.0/16`) with `policy: bypass`.
+  * Ingress-level separation ensures complete bypass without adding pod/service CIDRs to Authelia rules (which would inadvertently bypass Rathole-tunneled external traffic).
 
 ```
 [ Internet Client ]
@@ -141,10 +141,14 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entryPoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
     # Attach Authelia ForwardAuth from the 'authelia' namespace:
     traefik.ingress.kubernetes.io/router.middlewares: authelia-authelia-forwardauth@kubernetescrd
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - myapp.kimimueller.de
   rules:
     - host: myapp.kimimueller.de
       http:

@@ -5,6 +5,8 @@ metadata:
   namespace: authelia
   annotations:
     traefik.ingress.kubernetes.io/router.entryPoints: web,websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
     gethomepage.dev/enabled: "true"
     gethomepage.dev/name: "Authelia"
     gethomepage.dev/description: "Single Sign-On & Forward Auth Portal"
@@ -12,6 +14,9 @@ metadata:
     gethomepage.dev/icon: "authelia.png"
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - auth.kimimueller.de
   rules:
     # Public Ingress via VPS Rathole tunnel
     - host: auth.kimimueller.de

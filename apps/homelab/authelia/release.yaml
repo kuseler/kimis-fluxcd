@@ -17,18 +17,6 @@ spec:
     pod:
       kind: Deployment
       replicas: 1
-      extraVolumes:
-        - name: users-database
-          secret:
-            secretName: authelia-secrets
-            items:
-              - key: users_database.yml
-                path: users_database.yml
-      extraVolumeMounts:
-        - name: users-database
-          mountPath: /config/users_database.yml
-          subPath: users_database.yml
-          readOnly: true
     configMap:
       theme: light
       server:
@@ -53,7 +41,7 @@ spec:
       authentication_backend:
         file:
           enabled: true
-          path: /config/users_database.yml
+          path: /secrets/users_database.yml
           watch: true
       notifier:
         filesystem:
@@ -64,13 +52,6 @@ spec:
         rules:
           # Allow unauthenticated access to the Authelia portal itself
           - domain: auth.kimimueller.de
-            policy: bypass
-          # LAN & Internal network bypass (requests from homelab subnet / VPN / pod CIDR)
-          - domain: "*.kimimueller.de"
-            networks:
-              - 192.168.1.0/24  # Homelab LAN subnet
-              - 10.42.0.0/16    # K3s Pod CIDR
-              - 10.43.0.0/16    # K3s Service CIDR
             policy: bypass
           # Remote external requests via Rathole tunnel require 1FA (SSO session cookie)
           - domain: "*.kimimueller.de"

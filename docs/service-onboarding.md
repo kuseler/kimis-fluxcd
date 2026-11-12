@@ -39,10 +39,14 @@ Before writing manifests, determine where the service should be reachable:
      annotations:
        traefik.ingress.kubernetes.io/router.entryPoints: websecure
        traefik.ingress.kubernetes.io/router.tls: "true"
+       traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
        # Attach Authelia Forward-Auth middleware from the 'authelia' namespace:
        traefik.ingress.kubernetes.io/router.middlewares: authelia-authelia-forwardauth@kubernetescrd
    spec:
      ingressClassName: traefik
+     tls:
+       - hosts:
+           - example.kimimueller.de
      rules:
        - host: example.kimimueller.de
          http:
