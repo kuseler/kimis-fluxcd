@@ -27,15 +27,16 @@ spec:
               INI=/config/sabnzbd.ini
               WHITELIST="sabnzbd.homelab.home, sabnzbd.homelab.fritz.box, sabnzbd, sabnzbd.media.svc.cluster.local"
               if [ ! -f "$INI" ]; then
-                printf "[misc]\nhost_whitelist = %s\n" "$WHITELIST" > "$INI"
+                printf "__version__ = 19\n__encoding__ = utf-8\n[misc]\nhost_whitelist = %s\n" "$WHITELIST" > "$INI"
               elif grep -q "^host_whitelist[[:space:]]*=" "$INI"; then
                 sed -i "s|^host_whitelist[[:space:]]*=.*|host_whitelist = $WHITELIST|" "$INI"
               elif grep -q "^\[misc\]" "$INI"; then
-                sed -i "/^\[misc\]/a host_whitelist = $WHITELIST" "$INI"
+                awk -v wl="host_whitelist = $WHITELIST" '/^\[misc\]/ { print; print wl; next } { print }' "$INI" > "${INI}.tmp" && mv "${INI}.tmp" "$INI"
               else
                 printf "\n[misc]\nhost_whitelist = %s\n" "$WHITELIST" >> "$INI"
               fi
               chown 1000:1000 "$INI"
+              grep "^host_whitelist" "$INI"
           volumeMounts:
             - name: sabnzbd-config
               mountPath: /config
