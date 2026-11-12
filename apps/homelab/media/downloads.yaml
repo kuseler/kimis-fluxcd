@@ -16,6 +16,30 @@ spec:
         app: downloads
     spec:
       initContainers:
+        # Ensure SABnzbd allows local Traefik and cluster hostnames without manual UI setup
+        - name: sabnzbd-init
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              INI=/config/sabnzbd.ini
+              WHITELIST="sabnzbd.homelab.home, sabnzbd.homelab.fritz.box, sabnzbd, sabnzbd.media.svc.cluster.local"
+              if [ ! -f "$INI" ]; then
+                printf "[misc]\nhost_whitelist = %s\n" "$WHITELIST" > "$INI"
+              elif grep -q "^host_whitelist[[:space:]]*=" "$INI"; then
+                sed -i "s|^host_whitelist[[:space:]]*=.*|host_whitelist = $WHITELIST|" "$INI"
+              elif grep -q "^\[misc\]" "$INI"; then
+                sed -i "/^\[misc\]/a host_whitelist = $WHITELIST" "$INI"
+              else
+                printf "\n[misc]\nhost_whitelist = %s\n" "$WHITELIST" >> "$INI"
+              fi
+              chown 1000:1000 "$INI"
+          volumeMounts:
+            - name: sabnzbd-config
+              mountPath: /config
+
         # Gluetun VPN Gateway & Killswitch (ProtonVPN) as a native Kubernetes sidecar.
         # StartupProbe ensures the VPN tunnel and iptables killswitch are active before
         # sabnzbd and qbittorrent containers start.
