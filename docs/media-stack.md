@@ -14,6 +14,7 @@ This document describes the media automation, downloaders, and VPN killswitch ar
 | **Sonarr** | TV series automation | `http://sonarr.media.svc.cluster.local:8989` | `sonarr.homelab.home`, `sonarr.homelab.fritz.box` |
 | **Radarr** | Movie automation | `http://radarr.media.svc.cluster.local:7878` | `radarr.homelab.home`, `radarr.homelab.fritz.box` |
 | **Prowlarr** | Indexer manager & proxy | `http://prowlarr.media.svc.cluster.local:9696` | `prowlarr.homelab.home`, `prowlarr.homelab.fritz.box` |
+| **FlareSolverr** | Cloudflare proxy solver for Prowlarr indexers | `http://flaresolverr.media.svc.cluster.local:8191` | — (internal only) |
 | **Bazarr** | Subtitle automation (Sonarr/Radarr) | `http://bazarr.media.svc.cluster.local:6767` | `bazarr.homelab.home`, `bazarr.homelab.fritz.box` |
 | **Lidarr** | Music library automation | `http://lidarr.media.svc.cluster.local:8686` | `lidarr.homelab.home`, `lidarr.homelab.fritz.box` |
 | **Jellyfin** | Media streaming server | `http://jellyfin.media.svc.cluster.local:8096` | `jellyfin.homelab.home`, `jellyfin.homelab.fritz.box` |
