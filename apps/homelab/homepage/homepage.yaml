@@ -38,14 +38,12 @@ spec:
               containerPort: 3000
               protocol: TCP
           readinessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
-            httpGet:
-              path: /
+            tcpSocket:
               port: http
             initialDelaySeconds: 20
             periodSeconds: 20

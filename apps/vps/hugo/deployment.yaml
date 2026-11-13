@@ -21,13 +21,6 @@ spec:
         - name: hugo
           image: ghcr.io/kuseler/hugo-blog:latest
           imagePullPolicy: Always
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - NET_BIND_SERVICE
           ports:
             - name: http
               containerPort: 80
