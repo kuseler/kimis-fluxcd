@@ -84,7 +84,7 @@ spec:
             - name: FIREWALL
               value: "on"
             - name: FIREWALL_OUTBOUND_SUBNETS
-              value: "10.42.0.0/16,10.43.0.0/16,192.168.0.0/16,fd00:42::/56,fd00:43::/112"
+              value: "10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
             - name: FIREWALL_INPUT_PORTS
               value: "8080,8081"
             - name: HTTPPROXY
@@ -224,10 +224,9 @@ metadata:
   labels:
     app: sabnzbd
 spec:
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
   ipFamilies:
     - IPv4
-    - IPv6
   selector:
     app: downloads
   ports:
@@ -252,10 +251,9 @@ metadata:
   labels:
     app: qbittorrent
 spec:
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
   ipFamilies:
     - IPv4
-    - IPv6
   selector:
     app: downloads
   ports:
