@@ -7,6 +7,8 @@ metadata:
     app: downloads
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: downloads
@@ -67,16 +69,6 @@ spec:
                 secretKeyRef:
                   name: proton-vpn-secret
                   key: private-key
-            - name: OPENVPN_USER
-              valueFrom:
-                secretKeyRef:
-                  name: proton-vpn-secret
-                  key: username
-            - name: OPENVPN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: proton-vpn-secret
-                  key: password
             # Killswitch: block all non-VPN traffic except explicit cluster/LAN CIDRs
             - name: FIREWALL
               value: "on"
