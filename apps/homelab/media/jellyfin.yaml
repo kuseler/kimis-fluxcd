@@ -8,6 +8,7 @@ spec:
   chart:
     spec:
       chart: jellyfin
+      version: 3.7.0
       sourceRef:
         kind: HelmRepository
         name: jellyfin-helm
@@ -15,7 +16,7 @@ spec:
   values:
     image:
       repository: ghcr.io/jellyfin/jellyfin
-      tag: latest
+      tag: 10.11.11
       pullPolicy: IfNotPresent
     env:
       TZ: Europe/Berlin
@@ -46,6 +47,12 @@ spec:
         existingClaim: "media-nfs-pvc"
               
     # Hardware acceleration requires turning off the default securityContext limits
-    # The official chart handles security contexts differently than app-template
     securityContext:
       privileged: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 512Mi
+      limits:
+        cpu: 2000m
+        memory: 2Gi

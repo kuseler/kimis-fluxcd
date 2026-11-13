@@ -1,0 +1,93 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../_arr-base
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: arr-app-config-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: lidarr-config-pvc
+  - target:
+      kind: Deployment
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: lidarr
+      - op: replace
+        path: /metadata/labels/app
+        value: lidarr
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: lidarr
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: lidarr
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: lidarr
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: lscr.io/linuxserver/lidarr:3.1.6.5079-ls48
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 8686
+      - op: replace
+        path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: lidarr-config-pvc
+  - target:
+      kind: Service
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: lidarr
+      - op: replace
+        path: /metadata/labels/app
+        value: lidarr
+      - op: replace
+        path: /spec/selector/app
+        value: lidarr
+      - op: replace
+        path: /spec/ports/0/port
+        value: 8686
+      - op: replace
+        path: /spec/ports/0/targetPort
+        value: 8686
+  - target:
+      kind: Ingress
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: lidarr
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1name
+        value: "Lidarr"
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1description
+        value: "Music Management"
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1icon
+        value: "lidarr.png"
+      - op: replace
+        path: /spec/rules/0/host
+        value: lidarr.homelab.home
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/name
+        value: lidarr
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/port/number
+        value: 8686
+      - op: replace
+        path: /spec/rules/1/host
+        value: lidarr.homelab.fritz.box
+      - op: replace
+        path: /spec/rules/1/http/paths/0/backend/service/name
+        value: lidarr
+      - op: replace
+        path: /spec/rules/1/http/paths/0/backend/service/port/number
+        value: 8686

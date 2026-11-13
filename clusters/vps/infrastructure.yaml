@@ -5,6 +5,9 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
+  retryInterval: 2m
+  timeout: 5m
+  wait: true
   path: ./infrastructure/vps
   prune: true
   sourceRef:
