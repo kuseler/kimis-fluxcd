@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: homepage
-  namespace: default
+  namespace: homepage
 spec:
   replicas: 1
   selector:
@@ -14,88 +14,118 @@ spec:
         app: homepage
     spec:
       serviceAccountName: homepage
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
-      - name: homepage
-        image: ghcr.io/gethomepage/homepage:latest
-        env:
-        - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "homepage.kimimueller.de,homepage.homelab.fritz.box,homepage.homelab.home"
-        - name: PUID
-          value: "1000"
-        - name: PGID
-          value: "1000"
-        ports:
-        - containerPort: 3000
-        volumeMounts:
-        - name: config
-          mountPath: /app/config
-        - name: k8s-config
-          mountPath: /app/config/kubernetes.yaml
-          subPath: kubernetes.yaml
-        - name: k8s-config
-          mountPath: /app/config/settings.yaml
-          subPath: settings.yaml
-        - name: k8s-config
-          mountPath: /app/config/widgets.yaml
-          subPath: widgets.yaml
-        - name: k8s-config
-          mountPath: /app/config/services.yaml
-          subPath: services.yaml
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:v2.8.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "homepage.kimimueller.de,homepage.homelab.fritz.box,homepage.homelab.home"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+            - name: k8s-config
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
+            - name: k8s-config
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+            - name: k8s-config
+              mountPath: /app/config/widgets.yaml
+              subPath: widgets.yaml
+            - name: k8s-config
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
       volumes:
-      - name: config
-        hostPath:
-          path: /var/lib/homepage/config
-      - name: k8s-config
-        configMap:
-          name: homepage-config
+        - name: config
+          emptyDir:
+            sizeLimit: 100Mi
+        - name: k8s-config
+          configMap:
+            name: homepage-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: homepage
-  namespace: default
+  namespace: homepage
 spec:
   selector:
     app: homepage
   ports:
-  - protocol: TCP
-    port: 3000
-    targetPort: 3000
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: homepage-ingress
-  namespace: default
+  namespace: homepage
 spec:
   ingressClassName: traefik
   rules:
-  - host: homepage.homelab.fritz.box
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: homepage
-            port:
-              number: 3000
-  - host: homepage.homelab.home
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: homepage
-            port:
-              number: 3000
+    - host: homepage.homelab.fritz.box
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
+    - host: homepage.homelab.home
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: homepage-ingress-public
-  namespace: default
+  namespace: homepage
   annotations:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
@@ -105,13 +135,13 @@ spec:
     - hosts:
         - homepage.kimimueller.de
   rules:
-  - host: homepage.kimimueller.de
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: homepage
-            port:
-              number: 3000
+    - host: homepage.kimimueller.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000

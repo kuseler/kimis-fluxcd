@@ -1,4 +1,14 @@
 apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: https-redirect
+  namespace: hugo
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
   name: hugo-http
@@ -10,6 +20,8 @@ spec:
     - match: Host(`kimimueller.de`) || Host(`www.kimimueller.de`)
       kind: Rule
       priority: 10
+      middlewares:
+        - name: https-redirect
       services:
         - name: hugo
           port: 80

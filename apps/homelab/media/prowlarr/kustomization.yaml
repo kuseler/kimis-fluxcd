@@ -1,0 +1,106 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../_arr-base
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: arr-app-config-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prowlarr-config-pvc
+  - target:
+      kind: Deployment
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prowlarr
+      - op: replace
+        path: /metadata/labels/app
+        value: prowlarr
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: prowlarr
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: prowlarr
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: prowlarr
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: lscr.io/linuxserver/prowlarr:2.7.0.5723-ls168
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 9696
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: 128Mi
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: 500m
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: 512Mi
+      - op: remove
+        path: /spec/template/spec/containers/0/volumeMounts/1
+      - op: replace
+        path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: prowlarr-config-pvc
+      - op: remove
+        path: /spec/template/spec/volumes/1
+  - target:
+      kind: Service
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prowlarr
+      - op: replace
+        path: /metadata/labels/app
+        value: prowlarr
+      - op: replace
+        path: /spec/selector/app
+        value: prowlarr
+      - op: replace
+        path: /spec/ports/0/port
+        value: 9696
+      - op: replace
+        path: /spec/ports/0/targetPort
+        value: 9696
+  - target:
+      kind: Ingress
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: prowlarr
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1name
+        value: "Prowlarr"
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1description
+        value: "Indexer Manager"
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1icon
+        value: "prowlarr.png"
+      - op: replace
+        path: /spec/rules/0/host
+        value: prowlarr.homelab.home
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/name
+        value: prowlarr
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/port/number
+        value: 9696
+      - op: replace
+        path: /spec/rules/1/host
+        value: prowlarr.homelab.fritz.box
+      - op: replace
+        path: /spec/rules/1/http/paths/0/backend/service/name
+        value: prowlarr
+      - op: replace
+        path: /spec/rules/1/http/paths/0/backend/service/port/number
+        value: 9696

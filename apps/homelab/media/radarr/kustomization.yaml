@@ -1,0 +1,93 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../_arr-base
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: arr-app-config-pvc
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: radarr-config-pvc
+  - target:
+      kind: Deployment
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: radarr
+      - op: replace
+        path: /metadata/labels/app
+        value: radarr
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: radarr
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: radarr
+      - op: replace
+        path: /spec/template/spec/containers/0/name
+        value: radarr
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: lscr.io/linuxserver/radarr:6.4.4.10685-ls326
+      - op: replace
+        path: /spec/template/spec/containers/0/ports/0/containerPort
+        value: 7878
+      - op: replace
+        path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: radarr-config-pvc
+  - target:
+      kind: Service
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: radarr
+      - op: replace
+        path: /metadata/labels/app
+        value: radarr
+      - op: replace
+        path: /spec/selector/app
+        value: radarr
+      - op: replace
+        path: /spec/ports/0/port
+        value: 7878
+      - op: replace
+        path: /spec/ports/0/targetPort
+        value: 7878
+  - target:
+      kind: Ingress
+      name: arr-app
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: radarr
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1name
+        value: "Radarr"
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1description
+        value: "Movie Management"
+      - op: add
+        path: /metadata/annotations/gethomepage.dev~1icon
+        value: "radarr.png"
+      - op: replace
+        path: /spec/rules/0/host
+        value: radarr.homelab.home
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/name
+        value: radarr
+      - op: replace
+        path: /spec/rules/0/http/paths/0/backend/service/port/number
+        value: 7878
+      - op: replace
+        path: /spec/rules/1/host
+        value: radarr.homelab.fritz.box
+      - op: replace
+        path: /spec/rules/1/http/paths/0/backend/service/name
+        value: radarr
+      - op: replace
+        path: /spec/rules/1/http/paths/0/backend/service/port/number
+        value: 7878
