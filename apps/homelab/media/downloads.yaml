@@ -75,7 +75,7 @@ spec:
             - name: FIREWALL_OUTBOUND_SUBNETS
               value: "10.42.0.0/16,10.43.0.0/16,192.168.0.0/16"
             - name: FIREWALL_INPUT_PORTS
-              value: "8080,8081,8191"
+              value: "8080,8081"
             - name: HTTPPROXY
               value: "on"
             - name: HTTPPROXY_LISTENING_ADDRESS
@@ -92,9 +92,6 @@ spec:
               protocol: TCP
             - name: qbit-http
               containerPort: 8081
-              protocol: TCP
-            - name: flaresolverr
-              containerPort: 8191
               protocol: TCP
             - name: http-proxy
               containerPort: 8888
@@ -198,32 +195,6 @@ spec:
               cpu: 2000m
               memory: 2Gi
 
-        # FlareSolverr Cloudflare Proxy Solver (routed through Gluetun VPN)
-        - name: flaresolverr
-          image: ghcr.io/flaresolverr/flaresolverr:v3.5.2
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: LOG_LEVEL
-              value: info
-            - name: TZ
-              value: Europe/Berlin
-          readinessProbe:
-            tcpSocket:
-              port: 8191
-            initialDelaySeconds: 15
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 8191
-            initialDelaySeconds: 30
-            periodSeconds: 15
-          resources:
-            requests:
-              cpu: 50m
-              memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 1Gi
       volumes:
         - name: sabnzbd-config
           persistentVolumeClaim:
@@ -279,25 +250,6 @@ spec:
     - name: http
       port: 8081
       targetPort: 8081
-      protocol: TCP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: flaresolverr
-  namespace: media
-  labels:
-    app: flaresolverr
-spec:
-  ipFamilyPolicy: SingleStack
-  ipFamilies:
-    - IPv4
-  selector:
-    app: downloads
-  ports:
-    - name: http
-      port: 8191
-      targetPort: 8191
       protocol: TCP
 ---
 apiVersion: networking.k8s.io/v1

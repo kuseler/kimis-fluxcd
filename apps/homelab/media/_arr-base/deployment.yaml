@@ -17,6 +17,32 @@ spec:
       labels:
         app: arr-app
     spec:
+      initContainers:
+        - name: arr-init
+          image: busybox:1.37
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app']
+          command:
+            - sh
+            - -c
+            - |
+              CFG=/config/config.xml
+              HOSTS="${APP_NAME}.homelab.home,${APP_NAME}.homelab.fritz.box,${APP_NAME},${APP_NAME}.media.svc.cluster.local,localhost,127.0.0.1"
+              if [ -f "$CFG" ]; then
+                if grep -q "<AllowedHosts>" "$CFG"; then
+                  sed -i "s|<AllowedHosts>.*</AllowedHosts>|<AllowedHosts>${HOSTS}</AllowedHosts>|" "$CFG"
+                else
+                  sed -i "s|</Config>|  <AllowedHosts>${HOSTS}</AllowedHosts>\n</Config>|" "$CFG"
+                fi
+                chown 1000:1000 "$CFG"
+              fi
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: app
           image: lscr.io/linuxserver/arr-app:latest
