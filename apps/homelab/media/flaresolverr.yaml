@@ -54,10 +54,9 @@ metadata:
   labels:
     app: flaresolverr
 spec:
-  ipFamilyPolicy: PreferDualStack
+  ipFamilyPolicy: SingleStack
   ipFamilies:
     - IPv4
-    - IPv6
   selector:
     app: flaresolverr
   ports:
