@@ -5,6 +5,7 @@ resources:
   - config-pvcs.yaml
   - jellyfin.yaml
   - downloads.yaml
+  - flaresolverr.yaml
   - sonarr
   - radarr
   - prowlarr
