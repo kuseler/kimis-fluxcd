@@ -21,5 +21,5 @@ local_addr = "traefik.kube-system.svc.cluster.local:443"
 # CAVEAT: The Rathole pod must be able to reach this IP on your local network.
 [client.services.fritzbox-wg]
 # IMPORTANT: Change this to your Fritz!Box's actual IP and WireGuard port.
-local_addr = "192.168.1.1:50571"
+local_addr = "192.168.1.1:56151"
 type = "udp"
