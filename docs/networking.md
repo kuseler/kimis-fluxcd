@@ -26,7 +26,7 @@ Because the Homelab is behind a NAT, public traffic enters through the VPS and i
     *   The Rathole Client forwards HTTP/HTTPS traffic to the Homelab's Traefik instance (`traefik.kube-system.svc.cluster.local`).
     *   Homelab Traefik acts as the actual L7 Ingress Controller. It reads the Host headers/SNI (e.g., `homepage.kimimueller.de`) and routes traffic to the correct Homelab pods based on standard Kubernetes `Ingress` resources.
 4.  **Wireguard Traffic (UDP)**:
-    *   UDP port 51820 hits the VPS `rathole-external` LoadBalancer, goes through Rathole, and is forwarded directly to the Fritz!Box router (`192.168.1.1:50571`) by the Rathole Client.
+    *   UDP port 51820 hits the VPS `rathole-external` LoadBalancer, goes through Rathole, and is forwarded directly to the Fritz!Box router (`192.168.1.1:56151`) by the Rathole Client.
 
 ---
 
@@ -73,3 +73,8 @@ During the initial setup, a few issues were encountered and resolved. This docum
 **Symptom:** The client logs show the warning: `Failed to run the data channel: Expect UDP traffic. Please check the configuration.`
 **Cause:** By default, `rathole` assumes services are TCP. If a service is configured as UDP on the server, the client must also explicitly declare it as UDP.
 **Fix:** Ensure that any UDP service (like `fritzbox-wg`) includes `type = "udp"` in the client's configuration block (`[client.services.<name>]`). Note that the server configuration also requires this `type = "udp"` declaration.
+
+### 3. Fritz!Box WireGuard Listen Port Changes on Reset
+**Symptom:** WireGuard clients targeting `kimimueller.de:51820` fail to complete a handshake after all WireGuard connections on the Fritz!Box were deleted and recreated.
+**Cause:** Fritz!OS dynamically assigns a random UDP listen port (`5xxxx`) when initializing its WireGuard interface for the first peer. This port stays fixed when adding extra peers, but changes if all WireGuard peers are deleted and set up from scratch, or if a manual config with a custom `ListenPort` is imported.
+**Fix:** Verify the current port shown in the Fritz!Box MyFRITZ/WireGuard settings and update `local_addr` under `[client.services.fritzbox-wg]` in `apps/homelab/rathole-client/rathole-client.toml` to match. Note that clients connecting via the VPS must still use `Endpoint = kimimueller.de:51820` (not the internal Fritz!Box port).

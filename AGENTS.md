@@ -68,6 +68,7 @@ Agents are explicitly authorized and expected to keep this repository self-docum
   * Do not bind `bind_addr` directly to ports < 1024 inside the container. Use unprivileged ports (e.g. `8080`, `8443`) and let the Kubernetes `Service` map port `80`/`443` to targetPort `8080`/`8443`.
 * **Rathole Protocol Definitions**:
   * Any UDP service (e.g., WireGuard) must explicitly declare `type = "udp"` in both server and client configurations; otherwise Rathole defaults to TCP and drops data channels.
+  * The Fritz!Box assigns a random UDP port (`5xxxx`) when the first WireGuard peer is created (and keeps it until *all* WG peers are deleted). If all peers on the Fritz!Box are recreated, update `local_addr` in `apps/homelab/rathole-client/rathole-client.toml` while external clients keep using `kimimueller.de:51820`.
 * **CoreDNS Forwarding**:
   * CoreDNS forwarders should support dual-stack (IPv4 & IPv6) where applicable.
 * **Traefik Edge Routing Split (VPS)**:
