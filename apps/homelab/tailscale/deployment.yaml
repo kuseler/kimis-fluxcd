@@ -34,6 +34,8 @@ spec:
                   key: authkey
             - name: TS_STATE_DIR
               value: /var/lib/tailscale
+            - name: TS_KUBE_SECRET
+              value: ""
             - name: TS_USERSPACE
               value: "false"
             - name: TS_ROUTES

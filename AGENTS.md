@@ -77,3 +77,5 @@ Agents are explicitly authorized and expected to keep this repository self-docum
 * **Homepage Ingress Discovery & ConfigMounts**:
   * Homepage in `mode: cluster` requires `ingress: true` in `kubernetes.yaml` to discover Ingress resources annotated with `gethomepage.dev/enabled: "true"`.
   * Mount individual configuration files (`kubernetes.yaml`, `settings.yaml`, `widgets.yaml`, `services.yaml`) via `subPath` so `/app/config/logs` remains writable on the container filesystem.
+* **Tailscale `containerboot` in Kubernetes**:
+  * `tailscale/tailscale` defaults `TS_KUBE_SECRET` to `"tailscale"` when running inside Kubernetes, requiring Secret RBAC (`get`/`update`) even if `TS_STATE_DIR` is mounted on a PVC. Set `TS_KUBE_SECRET: ""` when persisting state to a PVC via `TS_STATE_DIR`.
