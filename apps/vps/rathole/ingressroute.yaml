@@ -18,7 +18,7 @@ spec:
 ---
 # Route HTTPS / TLS traffic for Homelab subdomains to rathole with TLS passthrough
 # so Homelab Traefik terminates TLS for homelab workloads.
-# kimimueller.de is terminated directly on the VPS by Hugo's IngressRoute.
+# kimimueller.de (Hugo) and headscale.kimimueller.de (Headscale) are terminated directly on the VPS.
 apiVersion: traefik.io/v1alpha1
 kind: IngressRouteTCP
 metadata:
@@ -28,7 +28,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: HostSNI(`*.kimimueller.de`, `*.*.kimimueller.de`)
+    - match: (HostSNI(`*.kimimueller.de`) || HostSNI(`*.*.kimimueller.de`)) && !HostSNI(`headscale.kimimueller.de`)
       services:
         - name: rathole
           port: 443
