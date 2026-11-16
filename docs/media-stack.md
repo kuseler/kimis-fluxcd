@@ -14,7 +14,7 @@ This document describes the media automation, downloaders, and VPN killswitch ar
 | **Sonarr** | TV series automation | `http://sonarr.media.svc.cluster.local:8989` | `sonarr.homelab.home`, `sonarr.homelab.fritz.box` |
 | **Radarr** | Movie automation | `http://radarr.media.svc.cluster.local:7878` | `radarr.homelab.home`, `radarr.homelab.fritz.box` |
 | **Prowlarr** | Indexer manager & proxy | `http://prowlarr.media.svc.cluster.local:9696` | `prowlarr.homelab.home`, `prowlarr.homelab.fritz.box` |
-| **FlareSolverr** | Cloudflare proxy solver for Prowlarr indexers (sidecar in `prowlarr` pod) | `http://localhost:8191` (pod-local)<br>`http://flaresolverr.media.svc.cluster.local:8191` | — (internal only) |
+| **Byparr** | Cloudflare proxy solver for Prowlarr indexers (sidecar in `prowlarr` pod) | `http://localhost:8191` (pod-local)<br>`http://byparr.media.svc.cluster.local:8191` | — (internal only) |
 | **Bazarr** | Subtitle automation (Sonarr/Radarr) | `http://bazarr.media.svc.cluster.local:6767` | `bazarr.homelab.home`, `bazarr.homelab.fritz.box` |
 | **Lidarr** | Music library automation | `http://lidarr.media.svc.cluster.local:8686` | `lidarr.homelab.home`, `lidarr.homelab.fritz.box` |
 | **Jellyfin** | Media streaming server | `http://jellyfin.media.svc.cluster.local:8096` | `jellyfin.homelab.home`, `jellyfin.homelab.fritz.box` |
@@ -30,7 +30,7 @@ Both **SABnzbd** and **qBittorrent** run inside the `downloads` Pod alongside th
 * **Ingress Ports (`FIREWALL_INPUT_PORTS=8080,8081`)**: Allows Traefik and cluster workloads to reach SABnzbd (`8080`) and qBittorrent (`8081`).
 * **Healthcheck**: Gluetun runs `/gluetun-entrypoint healthcheck` as a Kubernetes `livenessProbe` so the pod restarts automatically if the tunnel fails.
 
-**FlareSolverr** runs as a sidecar container inside the `prowlarr` Pod (`apps/homelab/media/prowlarr/`), sharing Prowlarr's network namespace so Prowlarr can reach it directly at `http://localhost:8191` (as well as via the `flaresolverr` Service at `http://flaresolverr.media.svc.cluster.local:8191`).
+**Byparr** runs as a sidecar container inside the `prowlarr` Pod (`apps/homelab/media/prowlarr/`), sharing Prowlarr's network namespace so Prowlarr can reach it directly at `http://localhost:8191` (as well as via the `byparr` Service at `http://byparr.media.svc.cluster.local:8191`).
 
 ### Required Secret: `proton-vpn-secret`
 
