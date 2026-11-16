@@ -2,6 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../_arr-base
+  - flaresolverr-service.yaml
 patches:
   - target:
       kind: PersistentVolumeClaim
@@ -51,6 +52,38 @@ patches:
         value: prowlarr-config-pvc
       - op: remove
         path: /spec/template/spec/volumes/1
+      - op: add
+        path: /spec/template/spec/containers/-
+        value:
+          name: flaresolverr
+          image: ghcr.io/flaresolverr/flaresolverr:v3.5.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: TZ
+              value: Europe/Berlin
+          ports:
+            - name: flaresolverr
+              containerPort: 8191
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 8191
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8191
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
   - target:
       kind: Service
       name: arr-app
